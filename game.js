@@ -1,19 +1,20 @@
-// Variáveis do jogo
+// Configurações
 const player = document.getElementById('player');
 const enemy = document.getElementById('enemy');
+const stageWidth = 800;
 let playerHP = 100;
 let enemyHP = 100;
 let score = 0;
 let stamina = 100;
 let isJumping = false;
 let isDefending = false;
+let isAttacking = false;
 let playerPos = 100;
 let enemyPos = 620;
 let enemySpeed = 0;
-let enemyDirection = -1; // -1 = esquerda, 1 = direita
-const stageWidth = 800;
+let enemyDirection = -1;
 
-// Atualiza a tela
+// Atualiza a interface
 function updateDisplay() {
     document.getElementById('health').textContent = playerHP;
     document.getElementById('score').textContent = score;
@@ -23,39 +24,31 @@ function updateDisplay() {
 // Controles
 document.addEventListener('keydown', (e) => {
     const key = e.key.toLowerCase();
-    if (key === 'a' && playerPos > 0) {
-        playerPos -= 10;
-    } else if (key === 'd' && playerPos < stageWidth - 80) {
-        playerPos += 10;
-    } else if (key === 'w' && !isJumping) {
-        jump();
-    } else if (key === ' ' && stamina >= 20) {
-        attack('punch');
-    } else if (key === 's' && stamina >= 30) {
-        attack('kick');
-    } else if (key === 'f') {
-        defend();
-    }
+    if (key === 'a' && playerPos > 0) playerPos -= 10;
+    if (key === 'd' && playerPos < stageWidth - 80) playerPos += 10;
+    if (key === 'w' && !isJumping) jump();
+    if (key === ' ' && stamina >= 20 && !isAttacking) attack('punch');
+    if (key === 's' && stamina >= 30 && !isAttacking) attack('kick');
+    if (key === 'f') defend();
     player.style.left = playerPos + 'px';
 });
 
 document.addEventListener('keyup', (e) => {
     if (e.key.toLowerCase() === 'f') {
         isDefending = false;
-        player.style.backgroundColor = 'rgba(52, 152, 219, 0.3)';
+        player.classList.remove('defending');
     }
 });
 
 // Pulo com física
 function jump() {
-    if (isJumping) return;
     isJumping = true;
     let velocity = -15;
     let position = 0;
 
     const jumpInterval = setInterval(() => {
         position += velocity;
-        velocity += 0.8; // Gravidade
+        velocity += 0.8;
         player.style.bottom = position + 'px';
 
         if (position >= 0) {
@@ -66,9 +59,8 @@ function jump() {
     }, 20);
 }
 
-// Ataque (soco ou chute)
+// Ataque
 function attack(type) {
-    if (isAttacking) return;
     isAttacking = true;
     const damage = type === 'punch' ? 10 : 15;
     stamina -= type === 'punch' ? 20 : 30;
@@ -79,14 +71,11 @@ function attack(type) {
         isAttacking = false;
     }, 200);
 
-    // Verifica colisão
     if (Math.abs(playerPos - enemyPos) < 100) {
         enemyHP -= damage;
         score += damage;
         enemy.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-        setTimeout(() => {
-            enemy.style.backgroundColor = 'rgba(231, 76, 60, 0.3)';
-        }, 200);
+        setTimeout(() => enemy.style.backgroundColor = 'rgba(231, 76, 60, 0.3)', 200);
     }
     updateDisplay();
 }
@@ -94,21 +83,19 @@ function attack(type) {
 // Defesa
 function defend() {
     isDefending = true;
-    player.style.backgroundColor = 'rgba(52, 152, 219, 0.6)';
+    player.classList.add('defending');
 }
 
-// IA do Inimigo (movimento fluido)
+// IA do Inimigo
 function enemyAI() {
-    // Movimento com aceleração
-    enemySpeed = enemyDirection * 2;
+    enemySpeed = enemyDirection * 3;
     enemyPos += enemySpeed;
 
-    // Muda de direção ao chegar nos limites
     if (enemyPos <= 0 || enemyPos >= stageWidth - 80) {
         enemyDirection *= -1;
+        enemy.style.transform = `scaleX(${enemyDirection > 0 ? 1 : -1})`;
     }
 
-    // Ataque aleatório
     if (Math.random() < 0.01 && Math.abs(playerPos - enemyPos) < 150) {
         enemyAttack();
     }
@@ -116,7 +103,7 @@ function enemyAI() {
     enemy.style.left = enemyPos + 'px';
 }
 
-// Ataque do inimigo
+// Ataque do Inimigo
 function enemyAttack() {
     enemy.classList.add('attacking');
     setTimeout(() => {
@@ -124,19 +111,17 @@ function enemyAttack() {
         if (Math.abs(playerPos - enemyPos) < 100 && !isDefending) {
             playerHP -= 10;
             player.style.backgroundColor = 'rgba(255, 0, 0, 0.5)';
-            setTimeout(() => {
-                player.style.backgroundColor = 'rgba(52, 152, 219, 0.3)';
-            }, 200);
+            setTimeout(() => player.style.backgroundColor = 'rgba(52, 152, 219, 0.3)', 200);
             updateDisplay();
         }
     }, 200);
 }
 
-// Regenera stamina
+// Regenera Stamina
 setInterval(() => {
     if (stamina < 100) stamina += 1;
     updateDisplay();
 }, 200);
 
-// Loop principal
+// Loop do Jogo
 setInterval(enemyAI, 50);

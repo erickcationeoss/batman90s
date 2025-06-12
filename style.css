@@ -30,7 +30,7 @@ body {
     font-size: 40px;
     text-align: center;
     line-height: 150px;
-    transition: transform 0.1s;
+    transition: all 0.2s ease;
 }
 
 .player {
@@ -43,18 +43,21 @@ body {
     right: 100px;
     background: rgba(231, 76, 60, 0.3);
     border: 2px solid #e74c3c;
+    transition: transform 0.3s ease-out;
 }
 
-/* Efeitos de ataque */
-.player.attacking {
-    transform: translateX(10px);
+/* Defesa */
+.player.defending {
+    filter: brightness(0.7);
+    border: 3px solid #f1c40f;
+    width: 100px;
 }
 
-.enemy.attacking {
-    transform: translateX(-10px);
+/* Ataque */
+.player.attacking, .enemy.attacking {
+    transform: scale(1.1);
 }
 
-/* Barra de status */
 .info {
     display: flex;
     justify-content: space-around;
