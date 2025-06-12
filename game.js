@@ -1,17 +1,18 @@
 // Configurações do jogo
 const config = {
-    playerSpeed: 10,
-    jumpForce: 18,
-    gravity: 0.9,
+    playerSpeed: 12,
+    jumpForce: 20,
+    gravity: 0.95,
     punchDamage: 15,
     kickDamage: 22,
     punchCost: 20,
     kickCost: 30,
-    enemySpeed: 3,
+    enemySpeed: 4,
     enemyAttackRange: 120,
-    staminaRegen: 0.8,
+    staminaRegen: 1,
     enemyAttackCooldown: 1500,
-    playerAttackCooldown: 400
+    playerAttackCooldown: 400,
+    knockbackForce: 30
 };
 
 // Elementos do jogo
@@ -51,8 +52,9 @@ let gameState = {
         isAttacking: false
     },
     score: 0,
-    lastFrame: 0,
-    isGameOver: false
+    lastFrame: performance.now(),
+    isGameOver: false,
+    animationFrameId: null
 };
 
 // Controles
@@ -66,15 +68,25 @@ const keys = {
 };
 
 // Inicialização
-function init() {
+function initGame() {
+    // Resetar estado
+    resetGame();
+    
+    // Configurar controles
     document.addEventListener('keydown', (e) => {
         const key = e.key.toLowerCase();
-        if (Object.keys(keys).includes(key)) keys[key] = true;
+        if (Object.keys(keys).includes(key)) {
+            keys[key] = true;
+            e.preventDefault();
+        }
     });
 
     document.addEventListener('keyup', (e) => {
         const key = e.key.toLowerCase();
-        if (Object.keys(keys).includes(key)) keys[key] = false;
+        if (Object.keys(keys).includes(key)) {
+            keys[key] = false;
+            e.preventDefault();
+        }
         
         if (key === 'f') {
             gameState.player.isDefending = false;
@@ -84,8 +96,8 @@ function init() {
 
     restartButton.addEventListener('click', resetGame);
     
-    updateDisplay();
-    requestAnimationFrame(gameLoop);
+    // Iniciar loop do jogo
+    gameState.animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 // Atualiza a interface
@@ -104,87 +116,90 @@ function updateDisplay() {
 
 // Movimento do jogador
 function updatePlayer(deltaTime) {
-    const player = gameState.player;
+    const playerState = gameState.player;
     
-    // Movimento horizontal
+    // Movimento horizontal mais fluido
     if (keys.a) {
-        player.pos -= config.playerSpeed;
-        player.direction = -1;
+        playerState.pos -= config.playerSpeed * (deltaTime / 16);
+        playerState.direction = -1;
     }
     if (keys.d) {
-        player.pos += config.playerSpeed;
-        player.direction = 1;
+        playerState.pos += config.playerSpeed * (deltaTime / 16);
+        playerState.direction = 1;
     }
     
     // Limites do palco
-    player.pos = Math.max(0, Math.min(stageWidth - playerWidth, player.pos));
+    playerState.pos = Math.max(0, Math.min(stageWidth - playerWidth, playerState.pos));
     
-    // Pulo
-    if (keys.w && !player.isJumping) {
-        player.velY = -config.jumpForce;
-        player.isJumping = true;
+    // Pulo com física melhorada
+    if (keys.w && !playerState.isJumping) {
+        playerState.velY = -config.jumpForce;
+        playerState.isJumping = true;
         player.classList.add('jumping');
     }
     
-    // Aplicar gravidade
-    player.velY += config.gravity;
-    player.isJumping = player.velY !== 0;
+    // Aplicar gravidade com deltaTime
+    playerState.velY += config.gravity * (deltaTime / 16);
+    playerState.isJumping = playerState.velY < 0 || Math.abs(playerState.velY) > 0.1;
     
     // Atualizar estado de pulo
-    player.classList.toggle('jumping', player.isJumping);
+    player.classList.toggle('jumping', playerState.isJumping);
     
-    // Ataques
-    const now = Date.now();
-    if (!player.isAttacking) {
-        if (keys[' '] && now - player.lastAttack > config.playerAttackCooldown) {
+    // Ataques com cooldown
+    const now = performance.now();
+    if (!playerState.isAttacking) {
+        if (keys[' '] && now - playerState.lastAttack > config.playerAttackCooldown) {
             attack('punch');
-        } else if (keys.s && now - player.lastAttack > config.playerAttackCooldown + 100) {
+        } else if (keys.s && now - playerState.lastAttack > config.playerAttackCooldown + 100) {
             attack('kick');
         }
     }
     
     // Defesa
-    if (keys.f) {
-        player.isDefending = true;
+    if (keys.f && !playerState.isAttacking) {
+        playerState.isDefending = true;
         player.classList.add('defending');
     }
     
     // Atualizar posição e direção
-    document.getElementById('player').style.left = player.pos + 'px';
-    document.getElementById('player').style.transform = `scaleX(${player.direction})`;
+    player.style.left = `${playerState.pos}px`;
+    player.style.transform = `scaleX(${playerState.direction})`;
 }
 
 // Ataque do jogador
 function attack(type) {
-    const player = gameState.player;
-    const now = Date.now();
+    const playerState = gameState.player;
+    const now = performance.now();
     
-    player.isAttacking = true;
-    player.lastAttack = now;
+    playerState.isAttacking = true;
+    playerState.lastAttack = now;
     
     const damage = type === 'punch' ? config.punchDamage : config.kickDamage;
     const staminaCost = type === 'punch' ? config.punchCost : config.kickCost;
     
-    if (player.stamina < staminaCost) return;
+    if (playerState.stamina < staminaCost) {
+        playerState.isAttacking = false;
+        return;
+    }
     
-    player.stamina -= staminaCost;
+    playerState.stamina -= staminaCost;
     player.classList.add('attacking');
     
     setTimeout(() => {
         player.classList.remove('attacking');
-        player.isAttacking = false;
+        playerState.isAttacking = false;
     }, type === 'punch' ? 150 : 200);
     
     // Verificar se acertou o inimigo
-    if (Math.abs(player.pos - gameState.enemy.pos) < 100) {
+    if (Math.abs(playerState.pos - gameState.enemy.pos) < 100) {
         gameState.enemy.hp = Math.max(0, gameState.enemy.hp - damage);
         gameState.score += damage;
         enemy.classList.add('hurt');
         setTimeout(() => enemy.classList.remove('hurt'), 200);
         
-        // Knockback no inimigo
-        const knockbackDir = player.pos < gameState.enemy.pos ? 1 : -1;
-        gameState.enemy.pos += knockbackDir * 20;
+        // Knockback no inimigo mais fluido
+        const knockbackDir = playerState.pos < gameState.enemy.pos ? 1 : -1;
+        gameState.enemy.pos += knockbackDir * (config.knockbackForce * (damage / 20));
     }
     
     updateDisplay();
@@ -193,67 +208,67 @@ function attack(type) {
 
 // IA do Inimigo
 function updateEnemy(deltaTime) {
-    const enemy = gameState.enemy;
-    const player = gameState.player;
+    const enemyState = gameState.enemy;
+    const playerState = gameState.player;
     
-    // Perseguição suave
-    const targetPos = player.pos + (playerWidth/2) - (enemyWidth/2);
-    const distance = targetPos - enemy.pos;
+    // Perseguição mais inteligente e fluida
+    const targetPos = playerState.pos + (playerWidth/2) - (enemyWidth/2);
+    const distance = targetPos - enemyState.pos;
     
-    // Suaviza o movimento com aceleração
-    enemy.speed = distance * 0.04;
+    // Movimento com aceleração suave
+    enemyState.speed = distance * 0.05 * (deltaTime / 16);
     
     // Limita a velocidade máxima
-    enemy.speed = Math.max(-config.enemySpeed, Math.min(config.enemySpeed, enemy.speed));
+    enemyState.speed = Math.max(-config.enemySpeed, Math.min(config.enemySpeed, enemyState.speed));
     
-    enemy.pos += enemy.speed * deltaTime * 0.1;
+    enemyState.pos += enemyState.speed;
     
     // Mantém dentro dos limites
-    enemy.pos = Math.max(0, Math.min(stageWidth - enemyWidth, enemy.pos));
+    enemyState.pos = Math.max(0, Math.min(stageWidth - enemyWidth, enemyState.pos));
     
-    // Flip da direção
-    if (enemy.speed !== 0) {
-        enemy.direction = Math.sign(enemy.speed);
-        enemy.style.transform = `scaleX(${enemy.direction})`;
+    // Direção do inimigo
+    if (Math.abs(enemyState.speed) > 0.5) {
+        enemyState.direction = Math.sign(enemyState.speed);
+        enemy.style.transform = `scaleX(${enemyState.direction})`;
     }
     
-    // Ataque
-    const now = Date.now();
-    if (Math.abs(player.pos - enemy.pos) < config.enemyAttackRange && 
-        !enemy.isAttacking && 
-        now - enemy.lastAttack > config.enemyAttackCooldown) {
+    // Ataque com tempo de recarga
+    const now = performance.now();
+    if (Math.abs(playerState.pos - enemyState.pos) < config.enemyAttackRange && 
+        !enemyState.isAttacking && 
+        now - enemyState.lastAttack > config.enemyAttackCooldown) {
         enemyAttack();
-        enemy.lastAttack = now;
+        enemyState.lastAttack = now;
     }
     
-    enemy.style.left = enemy.pos + 'px';
+    enemy.style.left = `${enemyState.pos}px`;
 }
 
 // Ataque do Inimigo
 function enemyAttack() {
-    const enemy = gameState.enemy;
-    const player = gameState.player;
+    const enemyState = gameState.enemy;
+    const playerState = gameState.player;
     
-    enemy.isAttacking = true;
+    enemyState.isAttacking = true;
     enemy.classList.add('attacking');
     
     setTimeout(() => {
         enemy.classList.remove('attacking');
-        enemy.isAttacking = false;
+        enemyState.isAttacking = false;
         
         // Verifica se acertou o jogador
-        if (Math.abs(player.pos - enemy.pos) < 100) {
-            if (!player.isDefending) {
-                player.hp = Math.max(0, player.hp - 12);
+        if (Math.abs(playerState.pos - enemyState.pos) < 100) {
+            if (!playerState.isDefending) {
+                playerState.hp = Math.max(0, playerState.hp - 12);
                 player.classList.add('hurt');
                 setTimeout(() => player.classList.remove('hurt'), 200);
                 
                 // Knockback no jogador
-                const knockbackDir = player.pos < enemy.pos ? -1 : 1;
-                player.pos += knockbackDir * 25;
+                const knockbackDir = playerState.pos < enemyState.pos ? -1 : 1;
+                playerState.pos += knockbackDir * (config.knockbackForce / 2);
             } else {
                 // Defesa bem-sucedida
-                player.stamina = Math.min(100, player.stamina + 8);
+                playerState.stamina = Math.min(100, playerState.stamina + 8);
             }
             updateDisplay();
             checkGameOver();
@@ -263,10 +278,11 @@ function enemyAttack() {
 
 // Regeneração de stamina
 function regenStamina(deltaTime) {
-    const player = gameState.player;
+    const playerState = gameState.player;
     
-    if (!player.isAttacking && !player.isDefending) {
-        player.stamina = Math.min(100, player.stamina + config.staminaRegen * deltaTime * 0.1);
+    if (!playerState.isAttacking && !playerState.isDefending) {
+        playerState.stamina = Math.min(100, 
+            playerState.stamina + (config.staminaRegen * (deltaTime / 16)));
     }
 }
 
@@ -275,16 +291,17 @@ function checkGameOver() {
     if (gameState.isGameOver) return;
     
     if (gameState.player.hp <= 0) {
-        gameState.isGameOver = true;
-        showGameOver(false);
+        endGame(false);
     } else if (gameState.enemy.hp <= 0) {
-        gameState.isGameOver = true;
-        showGameOver(true);
+        endGame(true);
     }
 }
 
-// Mostra tela de Game Over
-function showGameOver(isVictory) {
+// Finaliza o jogo
+function endGame(isVictory) {
+    gameState.isGameOver = true;
+    cancelAnimationFrame(gameState.animationFrameId);
+    
     resultMessage.textContent = isVictory ? "Você Venceu!" : "Game Over!";
     resultMessage.style.color = isVictory ? "#2ecc71" : "#e74c3c";
     finalScore.textContent = `Pontuação: ${gameState.score}`;
@@ -293,6 +310,12 @@ function showGameOver(isVictory) {
 
 // Reinicia o jogo
 function resetGame() {
+    // Cancelar qualquer animação pendente
+    if (gameState.animationFrameId) {
+        cancelAnimationFrame(gameState.animationFrameId);
+    }
+    
+    // Resetar estado
     gameState = {
         player: {
             hp: 100,
@@ -316,22 +339,26 @@ function resetGame() {
             isAttacking: false
         },
         score: 0,
-        lastFrame: 0,
-        isGameOver: false
+        lastFrame: performance.now(),
+        isGameOver: false,
+        animationFrameId: null
     };
     
+    // Resetar elementos visuais
     player.className = 'player';
     enemy.className = 'enemy';
     player.style.left = '100px';
-    enemy.style.left = (stageWidth - 100 - enemyWidth) + 'px';
+    enemy.style.left = `${stageWidth - 100 - enemyWidth}px`;
     gameOverScreen.style.display = 'none';
     
     updateDisplay();
+    
+    // Reiniciar loop do jogo
+    gameState.animationFrameId = requestAnimationFrame(gameLoop);
 }
 
 // Loop principal do jogo
 function gameLoop(timestamp) {
-    if (!gameState.lastFrame) gameState.lastFrame = timestamp;
     const deltaTime = timestamp - gameState.lastFrame;
     gameState.lastFrame = timestamp;
     
@@ -342,8 +369,8 @@ function gameLoop(timestamp) {
         checkGameOver();
     }
     
-    requestAnimationFrame(gameLoop);
+    gameState.animationFrameId = requestAnimationFrame(gameLoop);
 }
 
-// Inicia o jogo
-init();
+// Iniciar o jogo quando a página carregar
+window.addEventListener('load', initGame);
