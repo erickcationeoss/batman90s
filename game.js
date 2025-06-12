@@ -1,160 +1,112 @@
-// Configurações
-const config = {
-    gravity: 0.5,
-    speed: 5,
-    jump: 12
-};
+// Variáveis do jogo
+let score = 0;
+let lives = 3;
+let felix = document.getElementById('felix');
+let building = document.querySelector('.building');
+let windows = [];
+let bricks = [];
 
-// Elementos
-const game = document.getElementById('game');
-const batman = document.getElementById('batman');
-const hud = document.getElementById('hud');
-const startScreen = document.getElementById('start-screen');
-const startBtn = document.getElementById('start-btn');
+// Posição inicial do Felix
+let felixPos = { x: 100, y: 300 };
+felix.style.left = felixPos.x + 'px';
+felix.style.top = felixPos.y + 'px';
 
-// Estado do jogo
-let gameState = {
-    score: 0,
-    lives: 3,
-    vy: 0,
-    platforms: [],
-    enemies: [],
-    running: false
-};
-
-// Iniciar jogo
-function init() {
-    gameState = {
-        score: 0,
-        lives: 3,
-        vy: 0,
-        platforms: [],
-        enemies: [],
-        running: true
-    };
-    
-    startScreen.style.display = 'none';
-    batman.style.left = '100px';
-    batman.style.top = '300px';
-    
-    // Criar plataformas
-    createPlatform(0, 380, 800, 20);
-    createPlatform(100, 300, 200, 20);
-    createPlatform(400, 250, 150, 20);
-    
-    // Criar inimigos
-    createEnemy(300, 340);
-    createEnemy(500, 190);
-    
-    updateHUD();
-}
-
-function createPlatform(x, y, w, h) {
-    const platform = document.createElement('div');
-    platform.className = 'platform';
-    platform.style.left = x + 'px';
-    platform.style.top = y + 'px';
-    platform.style.width = w + 'px';
-    game.appendChild(platform);
-    gameState.platforms.push({x, y, w, h, el: platform});
-}
-
-function createEnemy(x, y) {
-    const enemy = document.createElement('div');
-    enemy.className = 'enemy';
-    enemy.style.left = x + 'px';
-    enemy.style.top = y + 'px';
-    game.appendChild(enemy);
-    gameState.enemies.push({x, y, el: enemy, dir: Math.random() > 0.5 ? 1 : -1});
-}
-
-function updateHUD() {
-    hud.textContent = `Vidas: ${gameState.lives} | Pontos: ${gameState.score}`;
-}
-
-function update() {
-    if (!gameState.running) return;
-    
-    // Gravidade
-    gameState.vy += config.gravity;
-    let top = parseInt(batman.style.top) + gameState.vy;
-    batman.style.top = top + 'px';
-    
-    // Colisão com plataformas
-    let onGround = false;
-    const bx = parseInt(batman.style.left);
-    const by = parseInt(batman.style.top);
-    
-    gameState.platforms.forEach(p => {
-        if (bx < p.x + p.w && bx + 50 > p.x && 
-            by < p.y + p.h && by + 80 > p.y && gameState.vy > 0) {
-            batman.style.top = (p.y - 80) + 'px';
-            gameState.vy = 0;
-            onGround = true;
+// Cria janelas quebradas
+function createWindows() {
+    for (let i = 0; i < 5; i++) {
+        for (let j = 0; j < 3; j++) {
+            const window = document.createElement('div');
+            window.className = 'window broken';
+            window.style.left = (150 + i * 100) + 'px';
+            window.style.top = (50 + j * 100) + 'px';
+            building.appendChild(window);
+            windows.push(window);
         }
-    });
-    
-    // Movimentar inimigos
-    gameState.enemies.forEach(e => {
-        e.x += e.dir * 2;
-        e.el.style.left = e.x + 'px';
-        
-        if (e.x < 0 || e.x > 760) e.dir *= -1;
-    });
-    
-    // Verificar game over
-    if (by > 400) {
-        gameState.lives--;
-        if (gameState.lives <= 0) gameOver();
-        else {
-            batman.style.left = '100px';
-            batman.style.top = '300px';
-            gameState.vy = 0;
-        }
-        updateHUD();
     }
-    
-    requestAnimationFrame(update);
 }
 
-function gameOver() {
-    gameState.running = false;
-    startScreen.style.display = 'flex';
-    game.querySelectorAll('.platform, .enemy').forEach(el => el.remove());
-}
-
-// Controles
-document.addEventListener('keydown', e => {
-    if (!gameState.running) return;
-    
-    const left = parseInt(batman.style.left);
-    
-    if (e.key === 'ArrowLeft') batman.style.left = (left - config.speed) + 'px';
-    if (e.key === 'ArrowRight') batman.style.left = (left + config.speed) + 'px';
-    if (e.key === ' ' && gameState.vy === 0) gameState.vy = -config.jump;
-    if (e.key === 'f') shootBatarang();
+// Movimento do Felix
+document.addEventListener('keydown', (e) => {
+    const speed = 20;
+    switch (e.key) {
+        case 'ArrowUp': felixPos.y -= speed; break;
+        case 'ArrowDown': felixPos.y += speed; break;
+        case 'ArrowLeft': felixPos.x -= speed; break;
+        case 'ArrowRight': felixPos.x += speed; break;
+    }
+    // Limita movimento dentro do prédio
+    felixPos.x = Math.max(0, Math.min(560, felixPos.x));
+    felixPos.y = Math.max(0, Math.min(340, felixPos.y));
+    felix.style.left = felixPos.x + 'px';
+    felix.style.top = felixPos.y + 'px';
+    checkWindowCollision();
 });
 
-function shootBatarang() {
-    const batarang = document.createElement('div');
-    batarang.className = 'batarang';
-    batarang.style.left = (parseInt(batman.style.left) + 25) + 'px';
-    batarang.style.top = (parseInt(batman.style.top) + 40) + 'px';
-    game.appendChild(batarang);
-    
-    let pos = parseInt(batarang.style.left);
-    const move = setInterval(() => {
-        pos += 10;
-        batarang.style.left = pos + 'px';
-        
-        if (pos > 800) {
-            clearInterval(move);
-            batarang.remove();
+// Verifica se Felix consertou uma janela
+function checkWindowCollision() {
+    windows.forEach(window => {
+        if (window.classList.contains('broken')) {
+            const rect = window.getBoundingClientRect();
+            if (
+                felixPos.x < rect.right && felixPos.x + 40 > rect.left &&
+                felixPos.y < rect.bottom && felixPos.y + 60 > rect.top
+            ) {
+                window.classList.remove('broken');
+                score += 10;
+                document.getElementById('score').textContent = score;
+            }
         }
-    }, 30);
+    });
 }
 
-// Iniciar
-startBtn.addEventListener('click', init);
-init();
-update();
+// Tijolos lançados pelo Ralph
+function createBrick() {
+    const brick = document.createElement('div');
+    brick.className = 'brick';
+    brick.style.left = Math.random() * 570 + 'px';
+    brick.style.top = '0px';
+    building.appendChild(brick);
+    bricks.push(brick);
+    animateBrick(brick);
+}
+
+function animateBrick(brick) {
+    let posY = 0;
+    const fallSpeed = 3;
+    const brickInterval = setInterval(() => {
+        posY += fallSpeed;
+        brick.style.top = posY + 'px';
+        // Verifica colisão com Felix
+        if (posY + 30 > felixPos.y && posY < felixPos.y + 60 &&
+            parseInt(brick.style.left) + 30 > felixPos.x && parseInt(brick.style.left) < felixPos.x + 40) {
+            lives--;
+            document.getElementById('lives').textContent = lives;
+            if (lives <= 0) gameOver();
+            clearInterval(brickInterval);
+            brick.remove();
+        }
+        // Remove tijolo se sair da tela
+        if (posY > 400) {
+            clearInterval(brickInterval);
+            brick.remove();
+        }
+    }, 20);
+}
+
+// Game Over
+function gameOver() {
+    alert(`Game Over! Pontuação: ${score}`);
+    resetGame();
+}
+
+function resetGame() {
+    score = 0;
+    lives = 3;
+    document.getElementById('score').textContent = score;
+    document.getElementById('lives').textContent = lives;
+    windows.forEach(w => w.classList.add('broken'));
+}
+
+// Inicia o jogo
+createWindows();
+setInterval(createBrick, 2000); // Novos tijolos a cada 2s

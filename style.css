@@ -1,72 +1,52 @@
 body {
-    margin: 0;
-    background: #000;
-    overflow: hidden;
+    font-family: 'Press Start 2P', cursive;
+    background: #1a1a2e;
+    color: #fff;
+    text-align: center;
 }
 
-#game {
+.game-container {
     width: 800px;
+    margin: 0 auto;
+}
+
+.building {
+    width: 600px;
     height: 400px;
     margin: 20px auto;
+    background: #4a4a6a;
     position: relative;
-    background: #111;
-    border: 4px solid #333;
+    overflow: hidden;
+    border: 5px solid #ff9f1c;
 }
 
-#batman {
+.window {
     width: 50px;
-    height: 80px;
+    height: 50px;
+    background: #ff9f1c;
+    border: 2px solid #1a1a2e;
     position: absolute;
-    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 80"><rect x="15" y="10" width="20" height="10" fill="black"/><rect x="10" y="20" width="30" height="40" fill="black"/><rect x="5" y="25" width="10" height="10" fill="yellow"/><rect x="35" y="25" width="10" height="10" fill="yellow"/><rect x="20" y="30" width="10" height="20" fill="yellow"/><rect x="15" y="60" width="5" height="15" fill="black"/><rect x="30" y="60" width="5" height="15" fill="black"/></svg>');
+    transition: background 0.3s;
 }
 
-.platform {
-    position: absolute;
-    height: 20px;
-    background: #444;
-    border: 2px solid #666;
+.window.broken {
+    background: #ff1c1c;
 }
 
-.enemy {
-    position: absolute;
+.felix {
     width: 40px;
-    height: 40px;
-    background: red;
-    border-radius: 50%;
+    height: 60px;
+    background: url('felix-sprite.png') no-repeat;
+    background-size: cover;
+    position: absolute;
+    z-index: 10;
 }
 
-.batarang {
-    position: absolute;
+.brick {
     width: 30px;
-    height: 15px;
-    background: yellow;
-    border-radius: 5px;
-}
-
-#hud {
+    height: 30px;
+    background: url('brick-sprite.png') no-repeat;
+    background-size: cover;
     position: absolute;
-    top: 10px;
-    left: 10px;
-    color: yellow;
-    font-family: monospace;
-}
-
-#start-screen {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: yellow;
-}
-
-#start-btn {
-    padding: 10px 20px;
-    background: yellow;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
+    z-index: 5;
 }
