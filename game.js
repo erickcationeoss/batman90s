@@ -1,46 +1,55 @@
 // Variáveis do jogo
 const player = document.getElementById('player');
 const enemy = document.getElementById('enemy');
-const stage = document.querySelector('.stage');
 let playerHP = 100;
 let score = 0;
 let isJumping = false;
-let playerPos = 50;
-let enemyAttackInterval;
+let isDefending = false;
+let playerPos = 100;
+let enemyPos = 450;
+let enemyDirection = -1; // -1 = esquerda, 1 = direita
 
-// Movimento do jogador
+// Controles
 document.addEventListener('keydown', (e) => {
-    switch (e.key.toLowerCase()) {
-        case 'a': // Esquerda
-            playerPos = Math.max(0, playerPos - 10);
-            break;
-        case 'd': // Direita
-            playerPos = Math.min(550, playerPos + 10);
-            break;
-        case 'w': // Pulo
-            if (!isJumping) jump();
-            break;
-        case ' ': // Ataque
-            attack();
-            break;
+    const key = e.key.toLowerCase();
+    if (key === 'a' && playerPos > 0) {
+        playerPos -= 10;
+    } else if (key === 'd' && playerPos < 550) {
+        playerPos += 10;
+    } else if (key === 'w' && !isJumping) {
+        jump();
+    } else if (key === ' ' && !isDefending) {
+        attack('punch');
+    } else if (key === 's' && !isDefending) {
+        attack('kick');
+    } else if (key === 'f') {
+        defend();
     }
     player.style.left = playerPos + 'px';
+});
+
+document.addEventListener('keyup', (e) => {
+    if (e.key.toLowerCase() === 'f') {
+        isDefending = false;
+        const defense = document.querySelector('.defense');
+        if (defense) defense.remove();
+    }
 });
 
 // Pulo
 function jump() {
     isJumping = true;
     let jumpHeight = 0;
-    const jumpUp = setInterval(() => {
-        jumpHeight += 2;
+    const jumpInterval = setInterval(() => {
+        jumpHeight += 4;
         player.style.bottom = jumpHeight + 'px';
-        if (jumpHeight >= 50) {
-            clearInterval(jumpUp);
-            const jumpDown = setInterval(() => {
-                jumpHeight -= 2;
+        if (jumpHeight >= 80) {
+            clearInterval(jumpInterval);
+            const fallInterval = setInterval(() => {
+                jumpHeight -= 4;
                 player.style.bottom = jumpHeight + 'px';
                 if (jumpHeight <= 0) {
-                    clearInterval(jumpDown);
+                    clearInterval(fallInterval);
                     isJumping = false;
                 }
             }, 20);
@@ -48,56 +57,77 @@ function jump() {
     }, 20);
 }
 
-// Ataque do jogador
-function attack() {
+// Ataque (soco ou chute)
+function attack(type) {
     const attackBox = document.createElement('div');
-    attackBox.className = 'attack';
+    attackBox.className = `attack ${type}`;
     attackBox.style.left = (playerPos + 50) + 'px';
-    stage.appendChild(attackBox);
+    document.querySelector('.stage').appendChild(attackBox);
 
-    // Movimento do ataque
     const attackInterval = setInterval(() => {
         const currentPos = parseInt(attackBox.style.left);
-        attackBox.style.left = (currentPos + 10) + 'px';
+        attackBox.style.left = (currentPos + 15) + 'px';
 
-        // Verifica colisão com o inimigo
-        if (currentPos > 500) {
+        // Colisão com o inimigo
+        if (currentPos + 30 > enemyPos && currentPos < enemyPos + 50) {
             clearInterval(attackInterval);
             attackBox.remove();
-            score += 10;
+            score += type === 'punch' ? 10 : 15;
             document.getElementById('score').textContent = score;
+        } else if (currentPos > 600) {
+            clearInterval(attackInterval);
+            attackBox.remove();
         }
     }, 20);
 }
 
-// Ataque do inimigo (aleatório)
-function startEnemyAttacks() {
-    enemyAttackInterval = setInterval(() => {
-        const attackBox = document.createElement('div');
-        attackBox.className = 'attack';
-        attackBox.style.left = '500px';
-        stage.appendChild(attackBox);
+// Defesa
+function defend() {
+    isDefending = true;
+    const defense = document.createElement('div');
+    defense.className = 'defense';
+    defense.style.left = playerPos + 'px';
+    document.querySelector('.stage').appendChild(defense);
+}
+
+// IA do Inimigo
+function enemyAI() {
+    // Movimento aleatório
+    enemyPos += enemyDirection * 5;
+    if (enemyPos <= 0 || enemyPos >= 550) {
+        enemyDirection *= -1;
+    }
+    enemy.style.left = enemyPos + 'px';
+
+    // Ataque aleatório
+    if (Math.random() < 0.02) {
+        const enemyAttack = document.createElement('div');
+        enemyAttack.className = 'attack punch';
+        enemyAttack.style.left = (enemyPos - 20) + 'px';
+        document.querySelector('.stage').appendChild(enemyAttack);
 
         const attackInterval = setInterval(() => {
-            const currentPos = parseInt(attackBox.style.left);
-            attackBox.style.left = (currentPos - 10) + 'px';
+            const currentPos = parseInt(enemyAttack.style.left);
+            enemyAttack.style.left = (currentPos - 10) + 'px';
 
-            // Verifica colisão com o jogador
+            // Colisão com o jogador
             if (currentPos < playerPos + 50 && currentPos > playerPos) {
-                playerHP -= 10;
-                document.getElementById('health').textContent = playerHP;
-                if (playerHP <= 0) {
-                    alert(`Game Over! Pontuação: ${score}`);
-                    resetGame();
+                if (!isDefending) {
+                    playerHP -= 10;
+                    document.getElementById('health').textContent = playerHP;
+                    if (playerHP <= 0) {
+                        alert(`Game Over! Pontuação: ${score}`);
+                        resetGame();
+                    }
                 }
-            }
-
-            if (currentPos < 0) {
                 clearInterval(attackInterval);
-                attackBox.remove();
+                enemyAttack.remove();
+            } else if (currentPos < 0) {
+                clearInterval(attackInterval);
+                enemyAttack.remove();
             }
         }, 20);
-    }, 2000); // Ataque a cada 2 segundos
+    }
 }
 
 // Reinicia o jogo
@@ -106,7 +136,11 @@ function resetGame() {
     score = 0;
     document.getElementById('health').textContent = playerHP;
     document.getElementById('score').textContent = score;
+    playerPos = 100;
+    enemyPos = 450;
+    player.style.left = playerPos + 'px';
+    enemy.style.left = enemyPos + 'px';
 }
 
-// Inicia o jogo
-startEnemyAttacks();
+// Loop do jogo
+setInterval(enemyAI, 50);
