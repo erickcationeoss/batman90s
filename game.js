@@ -1,112 +1,112 @@
 // Variáveis do jogo
+const player = document.getElementById('player');
+const enemy = document.getElementById('enemy');
+const stage = document.querySelector('.stage');
+let playerHP = 100;
 let score = 0;
-let lives = 3;
-let felix = document.getElementById('felix');
-let building = document.querySelector('.building');
-let windows = [];
-let bricks = [];
+let isJumping = false;
+let playerPos = 50;
+let enemyAttackInterval;
 
-// Posição inicial do Felix
-let felixPos = { x: 100, y: 300 };
-felix.style.left = felixPos.x + 'px';
-felix.style.top = felixPos.y + 'px';
-
-// Cria janelas quebradas
-function createWindows() {
-    for (let i = 0; i < 5; i++) {
-        for (let j = 0; j < 3; j++) {
-            const window = document.createElement('div');
-            window.className = 'window broken';
-            window.style.left = (150 + i * 100) + 'px';
-            window.style.top = (50 + j * 100) + 'px';
-            building.appendChild(window);
-            windows.push(window);
-        }
-    }
-}
-
-// Movimento do Felix
+// Movimento do jogador
 document.addEventListener('keydown', (e) => {
-    const speed = 20;
-    switch (e.key) {
-        case 'ArrowUp': felixPos.y -= speed; break;
-        case 'ArrowDown': felixPos.y += speed; break;
-        case 'ArrowLeft': felixPos.x -= speed; break;
-        case 'ArrowRight': felixPos.x += speed; break;
+    switch (e.key.toLowerCase()) {
+        case 'a': // Esquerda
+            playerPos = Math.max(0, playerPos - 10);
+            break;
+        case 'd': // Direita
+            playerPos = Math.min(550, playerPos + 10);
+            break;
+        case 'w': // Pulo
+            if (!isJumping) jump();
+            break;
+        case ' ': // Ataque
+            attack();
+            break;
     }
-    // Limita movimento dentro do prédio
-    felixPos.x = Math.max(0, Math.min(560, felixPos.x));
-    felixPos.y = Math.max(0, Math.min(340, felixPos.y));
-    felix.style.left = felixPos.x + 'px';
-    felix.style.top = felixPos.y + 'px';
-    checkWindowCollision();
+    player.style.left = playerPos + 'px';
 });
 
-// Verifica se Felix consertou uma janela
-function checkWindowCollision() {
-    windows.forEach(window => {
-        if (window.classList.contains('broken')) {
-            const rect = window.getBoundingClientRect();
-            if (
-                felixPos.x < rect.right && felixPos.x + 40 > rect.left &&
-                felixPos.y < rect.bottom && felixPos.y + 60 > rect.top
-            ) {
-                window.classList.remove('broken');
-                score += 10;
-                document.getElementById('score').textContent = score;
-            }
-        }
-    });
-}
-
-// Tijolos lançados pelo Ralph
-function createBrick() {
-    const brick = document.createElement('div');
-    brick.className = 'brick';
-    brick.style.left = Math.random() * 570 + 'px';
-    brick.style.top = '0px';
-    building.appendChild(brick);
-    bricks.push(brick);
-    animateBrick(brick);
-}
-
-function animateBrick(brick) {
-    let posY = 0;
-    const fallSpeed = 3;
-    const brickInterval = setInterval(() => {
-        posY += fallSpeed;
-        brick.style.top = posY + 'px';
-        // Verifica colisão com Felix
-        if (posY + 30 > felixPos.y && posY < felixPos.y + 60 &&
-            parseInt(brick.style.left) + 30 > felixPos.x && parseInt(brick.style.left) < felixPos.x + 40) {
-            lives--;
-            document.getElementById('lives').textContent = lives;
-            if (lives <= 0) gameOver();
-            clearInterval(brickInterval);
-            brick.remove();
-        }
-        // Remove tijolo se sair da tela
-        if (posY > 400) {
-            clearInterval(brickInterval);
-            brick.remove();
+// Pulo
+function jump() {
+    isJumping = true;
+    let jumpHeight = 0;
+    const jumpUp = setInterval(() => {
+        jumpHeight += 2;
+        player.style.bottom = jumpHeight + 'px';
+        if (jumpHeight >= 50) {
+            clearInterval(jumpUp);
+            const jumpDown = setInterval(() => {
+                jumpHeight -= 2;
+                player.style.bottom = jumpHeight + 'px';
+                if (jumpHeight <= 0) {
+                    clearInterval(jumpDown);
+                    isJumping = false;
+                }
+            }, 20);
         }
     }, 20);
 }
 
-// Game Over
-function gameOver() {
-    alert(`Game Over! Pontuação: ${score}`);
-    resetGame();
+// Ataque do jogador
+function attack() {
+    const attackBox = document.createElement('div');
+    attackBox.className = 'attack';
+    attackBox.style.left = (playerPos + 50) + 'px';
+    stage.appendChild(attackBox);
+
+    // Movimento do ataque
+    const attackInterval = setInterval(() => {
+        const currentPos = parseInt(attackBox.style.left);
+        attackBox.style.left = (currentPos + 10) + 'px';
+
+        // Verifica colisão com o inimigo
+        if (currentPos > 500) {
+            clearInterval(attackInterval);
+            attackBox.remove();
+            score += 10;
+            document.getElementById('score').textContent = score;
+        }
+    }, 20);
 }
 
+// Ataque do inimigo (aleatório)
+function startEnemyAttacks() {
+    enemyAttackInterval = setInterval(() => {
+        const attackBox = document.createElement('div');
+        attackBox.className = 'attack';
+        attackBox.style.left = '500px';
+        stage.appendChild(attackBox);
+
+        const attackInterval = setInterval(() => {
+            const currentPos = parseInt(attackBox.style.left);
+            attackBox.style.left = (currentPos - 10) + 'px';
+
+            // Verifica colisão com o jogador
+            if (currentPos < playerPos + 50 && currentPos > playerPos) {
+                playerHP -= 10;
+                document.getElementById('health').textContent = playerHP;
+                if (playerHP <= 0) {
+                    alert(`Game Over! Pontuação: ${score}`);
+                    resetGame();
+                }
+            }
+
+            if (currentPos < 0) {
+                clearInterval(attackInterval);
+                attackBox.remove();
+            }
+        }, 20);
+    }, 2000); // Ataque a cada 2 segundos
+}
+
+// Reinicia o jogo
 function resetGame() {
+    playerHP = 100;
     score = 0;
-    lives = 3;
+    document.getElementById('health').textContent = playerHP;
     document.getElementById('score').textContent = score;
-    document.getElementById('lives').textContent = lives;
-    windows.forEach(w => w.classList.add('broken'));
 }
 
 // Inicia o jogo
-createWindows();
-setInterval(createBrick, 2000); // Novos tijolos a cada 2s
+startEnemyAttacks();

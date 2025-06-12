@@ -1,20 +1,19 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Fix-It Felix Jr. (Acadêmico)</title>
+    <title>Luta Minimalista</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
-        <h1>Fix-It Felix Jr.</h1>
+        <h1>Luta Acadêmica</h1>
         <div class="info">
             <span>Pontos: <span id="score">0</span></span>
-            <span>Vidas: <span id="lives">3</span></span>
+            <span>HP: <span id="health">100</span></span>
         </div>
-        <div class="building">
-            <div class="felix" id="felix"></div>
-            <!-- Janelas geradas via JavaScript -->
+        <div class="stage">
+            <div class="player" id="player"></div>
+            <div class="enemy" id="enemy"></div>
         </div>
     </div>
     <script src="game.js"></script>
