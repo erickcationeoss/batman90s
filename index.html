@@ -1,14 +1,80 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
+    <meta charset="UTF-8">
     <title>Street Fighter Revival</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- (Conteúdo mantido igual ao anterior) -->
+    <div id="game-container">
+        <!-- Tela de Seleção -->
+        <div id="character-select" class="screen">
+            <h1>ESCOLHA SEU LUTADOR</h1>
+            <div class="characters">
+                <div class="character-card" id="hero">
+                    <div class="character-preview">
+                        <div class="head"></div>
+                        <div class="body"></div>
+                        <div class="arm left"></div>
+                        <div class="arm right"></div>
+                        <div class="leg left"></div>
+                        <div class="leg right"></div>
+                    </div>
+                    <h2>HERÓI</h2>
+                    <p>Ataque Especial: Hadouken (Q)</p>
+                </div>
+                <div class="character-card" id="villain">
+                    <div class="character-preview">
+                        <div class="head"></div>
+                        <div class="body"></div>
+                        <div class="arm left"></div>
+                        <div class="arm right"></div>
+                        <div class="leg left"></div>
+                        <div class="leg right"></div>
+                    </div>
+                    <h2>VILÃO</h2>
+                    <p>Ataque Especial: Shoryuken (Q)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tela do Jogo -->
+        <div id="game-screen" class="screen hidden">
+            <div class="ui-container">
+                <div class="health-container">
+                    <div class="health-bar">
+                        <div class="health-fill" id="player-health"></div>
+                        <div class="stamina-fill" id="player-stamina"></div>
+                        <div class="name">PLAYER</div>
+                    </div>
+                    <div class="timer">99</div>
+                    <div class="health-bar">
+                        <div class="health-fill" id="enemy-health"></div>
+                        <div class="stamina-fill" id="enemy-stamina"></div>
+                        <div class="name">CPU</div>
+                    </div>
+                </div>
+                <div class="round-display">ROUND 1</div>
+            </div>
+
+            <div class="stage">
+                <div class="background"></div>
+                <div class="player" id="player"></div>
+                <div class="enemy" id="enemy"></div>
+                <div class="floor"></div>
+                <div id="effects"></div>
+            </div>
+        </div>
+
+        <!-- Tela de Resultado -->
+        <div id="result-screen" class="screen hidden">
+            <h1 id="result-title">VITÓRIA!</h1>
+            <div id="result-message"></div>
+            <button id="rematch-btn">REVANCHE</button>
+        </div>
+    </div>
+
     <script src="game.js"></script>
 </body>
 </html>

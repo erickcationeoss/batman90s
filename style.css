@@ -1,183 +1,403 @@
-/* Estilo Minimalista com Cores Pastéis */
-body {
-    font-family: 'Press Start 2P', cursive;
-    background: #f0f4f8;
-    color: #2d3748;
+/* Estilos Base */
+* {
+    box-sizing: border-box;
     margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Rubik', sans-serif;
+    background: #1a1a2e;
+    color: #fff;
     overflow: hidden;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .screen {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
+    width: 1000px;
+    height: 600px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hidden {
+    display: none;
 }
 
 /* Tela de Seleção */
+#character-select {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
+}
+
 #character-select h1 {
-    color: #4a5568;
-    text-shadow: 2px 2px 0 #cbd5e0;
-    margin-bottom: 50px;
-    font-size: 24px;
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    color: #e94560;
+    text-shadow: 3px 3px 0 #000;
 }
 
 .characters {
     display: flex;
-    gap: 100px;
+    gap: 4rem;
 }
 
-.character {
+.character-card {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem;
     cursor: pointer;
+    transition: all 0.3s ease;
+    width: 300px;
     text-align: center;
-    transition: transform 0.2s;
+    border: 3px solid transparent;
 }
 
-.character:hover {
-    transform: scale(1.1);
+.character-card:hover {
+    transform: translateY(-10px);
+    border-color: #e94560;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-.character .sprite {
-    width: 120px;
-    height: 180px;
+.character-card h2 {
+    font-size: 1.8rem;
+    margin: 1rem 0 0.5rem;
+    color: #fff;
+}
+
+.character-card p {
+    color: #a5b1c2;
+    font-size: 0.9rem;
+}
+
+.character-preview {
+    width: 150px;
+    height: 200px;
+    margin: 0 auto;
     position: relative;
-    margin: 0 auto 20px;
-    border: 4px solid #a0aec0;
-    background: #edf2f7;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
 }
 
 /* Elementos dos Personagens */
 .head {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
+    background: #f5d7b3;
     border-radius: 50%;
     position: absolute;
-    top: 10px;
-    left: 40px;
+    top: 20px;
+    left: 50px;
+    border: 2px solid #d4a574;
 }
 
 .body {
-    width: 30px;
-    height: 60px;
+    width: 40px;
+    height: 70px;
     position: absolute;
-    top: 50px;
-    left: 45px;
+    top: 70px;
+    left: 55px;
 }
 
 .arm {
-    width: 12px;
-    height: 40px;
-    position: absolute;
-    top: 50px;
-}
-
-.arm.left { left: 33px; }
-.arm.right { left: 75px; }
-
-.leg {
     width: 15px;
     height: 50px;
     position: absolute;
-    top: 110px;
+    top: 70px;
 }
 
-.leg.left { left: 42px; }
-.leg.right { left: 63px; }
+.arm.left { left: 35px; transform: rotate(20deg); }
+.arm.right { left: 100px; transform: rotate(-20deg); }
+
+.leg {
+    width: 20px;
+    height: 60px;
+    position: absolute;
+    top: 140px;
+}
+
+.leg.left { left: 50px; }
+.leg.right { left: 80px; }
 
 /* Herói */
-#hero .head { background: #f5d7b3; border: 2px solid #d4a574; }
-#hero .body { background: #90cdf4; border: 2px solid #4299e1; }
-#hero .arm { background: #90cdf4; border: 2px solid #4299e1; }
-#hero .leg { background: #63b3ed; border: 2px solid #3182ce; }
-
-/* Vilão */
-#villain .head { background: #f5d7b3; border: 2px solid #d4a574; }
-#villain .body { background: #feb2b2; border: 2px solid #f56565; }
-#villain .arm { background: #feb2b2; border: 2px solid #f56565; }
-#villain .leg { background: #fc8181; border: 2px solid #e53e3e; }
-
-/* Jogo */
-.game-container {
-    width: 800px;
-    margin: 0 auto;
-    padding-top: 20px;
+#hero .body, #hero .arm.left, #hero .arm.right {
+    background: #4e7ac7;
+    border: 2px solid #3a5a9a;
 }
 
-.health-bars {
+#hero .leg.left, #hero .leg.right {
+    background: #3a5a9a;
+    border: 2px solid #2a3f6b;
+}
+
+/* Vilão */
+#villain .body, #villain .arm.left, #villain .arm.right {
+    background: #c74e4e;
+    border: 2px solid #9a3a3a;
+}
+
+#villain .leg.left, #villain .leg.right {
+    background: #9a3a3a;
+    border: 2px solid #6b2a2a;
+}
+
+/* Tela do Jogo */
+#game-screen {
+    background: linear-gradient(180deg, #16213e 0%, #0f3460 100%);
+}
+
+.ui-container {
+    position: absolute;
+    top: 20px;
+    width: 100%;
+    padding: 0 2rem;
+    z-index: 100;
+}
+
+.health-container {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
+    align-items: center;
 }
 
 .health-bar {
-    width: 350px;
+    width: 400px;
+    position: relative;
 }
 
-.health {
+.health-fill {
     height: 20px;
-    border: 2px solid #a0aec0;
-    transition: width 0.3s;
+    border-radius: 10px;
+    transition: width 0.3s ease;
 }
 
-#player-health {
-    background: #90cdf4;
+.stamina-fill {
+    height: 5px;
+    background: #f5b349;
+    border-radius: 0 0 5px 5px;
+    margin-top: 2px;
+    transition: width 0.3s ease;
 }
 
-#enemy-health {
-    background: #feb2b2;
+#player-health, #player-stamina {
+    background: #4e7ac7;
+}
+
+#enemy-health, #enemy-stamina {
+    background: #c74e4e;
 }
 
 .name {
-    font-size: 12px;
+    font-size: 1.2rem;
     margin-top: 5px;
     text-align: center;
-    color: #4a5568;
+    color: #fff;
+    font-weight: bold;
 }
 
+.timer {
+    font-size: 2rem;
+    color: #fff;
+    font-weight: bold;
+    width: 100px;
+    text-align: center;
+}
+
+.round-display {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.5rem;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 0.5rem 2rem;
+    border-radius: 20px;
+    animation: roundAnnounce 2s forwards;
+}
+
+@keyframes roundAnnounce {
+    0% { opacity: 0; transform: translateX(-50%) scale(2); }
+    50% { opacity: 1; transform: translateX(-50%) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) scale(0.5); }
+}
+
+/* Cenário */
 .stage {
-    width: 800px;
-    height: 300px;
-    background: #bee3f8;
+    width: 100%;
+    height: 100%;
     position: relative;
-    overflow: hidden;
-    border: 8px solid #a0aec0;
+}
+
+.background {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><rect width="1000" height="600" fill="%2316213e"/><circle cx="200" cy="150" r="80" fill="%230f3460" opacity="0.3"/><circle cx="800" cy="100" r="120" fill="%230f3460" opacity="0.3"/><circle cx="500" cy="400" r="150" fill="%230f3460" opacity="0.3"/></svg>');
+    z-index: 1;
 }
 
 .floor {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 20px;
-    background: #e2e8f0;
+    height: 100px;
+    background: linear-gradient(0deg, #1a1a2e 0%, #16213e 100%);
+    z-index: 2;
 }
 
 .player, .enemy {
-    width: 80px;
-    height: 150px;
+    width: 100px;
+    height: 200px;
     position: absolute;
-    bottom: 20px;
-    transition: all 0.1s;
+    bottom: 100px;
+    z-index: 10;
+    transition: transform 0.1s ease;
 }
 
-.player { left: 100px; }
-.enemy { right: 100px; }
+.player {
+    left: 200px;
+}
+
+.enemy {
+    right: 200px;
+}
+
+/* Personagens no jogo */
+.player .head, .enemy .head {
+    width: 40px;
+    height: 40px;
+    left: 30px;
+    top: 10px;
+}
+
+.player .body, .enemy .body {
+    width: 30px;
+    height: 60px;
+    left: 35px;
+    top: 50px;
+}
+
+.player .arm, .enemy .arm {
+    width: 12px;
+    height: 40px;
+    top: 50px;
+}
+
+.player .arm.left, .enemy .arm.left {
+    left: 23px;
+}
+
+.player .arm.right, .enemy .arm.right {
+    left: 65px;
+}
+
+.player .leg, .enemy .leg {
+    width: 15px;
+    height: 50px;
+    top: 110px;
+}
+
+.player .leg.left, .enemy .leg.left {
+    left: 30px;
+}
+
+.player .leg.right, .enemy .leg.right {
+    left: 55px;
+}
 
 /* Efeitos */
+#effects {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 20;
+}
+
 .effect {
     position: absolute;
-    pointer-events: none;
 }
 
 .hit-effect {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 237, 213, 0.7);
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.7);
     border-radius: 50%;
-    animation: hit 0.3s forwards;
+    animation: hitEffect 0.3s forwards;
 }
 
-@keyframes hit {
+@keyframes hitEffect {
     0% { transform: scale(0); opacity: 1; }
-    100% { transform: scale(2); opacity: 0; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+.hadouken {
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, #fff, #4e7ac7);
+    border-radius: 50%;
+    animation: hadouken 1s linear forwards;
+}
+
+@keyframes hadouken {
+    0% { transform: translateX(0) scale(0.5); opacity: 1; }
+    100% { transform: translateX(500px) scale(1.2); opacity: 0; }
+}
+
+.shoryuken {
+    width: 60px;
+    height: 100px;
+    background: linear-gradient(to bottom, #c74e4e, #ff0000);
+    animation: shoryuken 0.8s ease-out forwards;
+}
+
+@keyframes shoryuken {
+    0% { transform: translateY(0) scaleY(0.5); opacity: 1; }
+    50% { transform: translateY(-200px) scaleY(1.2); opacity: 1; }
+    100% { transform: translateY(-400px) scaleY(0); opacity: 0; }
+}
+
+/* Tela de Resultado */
+#result-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#result-title {
+    font-size: 4rem;
+    margin-bottom: 2rem;
+    color: #e94560;
+    text-shadow: 3px 3px 0 #000;
+}
+
+#result-message {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+#rematch-btn {
+    background: #e94560;
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#rematch-btn:hover {
+    background: #ff6b81;
+    transform: scale(1.05);
 }
