@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Street Fighter Revival</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="app">
+        <!-- Tela de Seleção -->
         <div id="character-select" class="screen">
             <h1>ESCOLHA SEU LUTADOR</h1>
             <div class="characters">
@@ -23,8 +24,14 @@
                     <p>Ataque Especial: Shoryuken (Q)</p>
                 </div>
             </div>
+            <div class="controls">
+                <p>CONTROLES:</p>
+                <p>← → MOVER | W PULAR</p>
+                <p>R: SOCO | E: CHUTE | F: DEFESA</p>
+            </div>
         </div>
 
+        <!-- Tela do Jogo -->
         <div id="game-screen" class="screen hidden">
             <div class="ui-container">
                 <div class="health-container">
@@ -44,7 +51,6 @@
             </div>
 
             <div class="stage">
-                <div class="background"></div>
                 <div class="player" id="player"></div>
                 <div class="enemy" id="enemy"></div>
                 <div class="floor"></div>
@@ -52,6 +58,7 @@
             </div>
         </div>
 
+        <!-- Tela de Resultado -->
         <div id="result-screen" class="screen hidden">
             <h1 id="result-title">VITÓRIA!</h1>
             <div id="result-message"></div>

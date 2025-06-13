@@ -1,15 +1,16 @@
 class StreetFighterGame {
     constructor() {
-        // Configurações
+        // Configurações do jogo
         this.config = {
             stageWidth: window.innerWidth,
             stageHeight: window.innerHeight,
-            gravity: 0.8,
-            jumpForce: -15,
+            gravity: 0.9,
+            jumpForce: -18,
             moveSpeed: 5,
-            attackCooldown: 500,
+            attackCooldown: 300,
             specialCooldown: 3000,
-            roundTime: 99
+            roundTime: 99,
+            groundLevel: 100
         };
 
         // Estado do jogo
@@ -76,9 +77,18 @@ class StreetFighterGame {
         this.dom.characterSelect.classList.add('hidden');
         this.dom.gameScreen.classList.remove('hidden');
         
-        // Ajusta posições baseado no tamanho da tela
-        this.state.playerPos = 200;
-        this.state.enemyPos = this.config.stageWidth - 280;
+        // Troca cores quando seleciona vilão
+        if (character === 'villain') {
+            this.dom.player.classList.add('villain');
+            this.dom.player.classList.remove('hero');
+            this.dom.enemy.classList.add('hero');
+            this.dom.enemy.classList.remove('villain');
+        } else {
+            this.dom.player.classList.add('hero');
+            this.dom.player.classList.remove('villain');
+            this.dom.enemy.classList.add('villain');
+            this.dom.enemy.classList.remove('hero');
+        }
         
         this.startGame();
     }
@@ -129,7 +139,7 @@ class StreetFighterGame {
             this.state.playerPos = Math.max(0, this.state.playerPos - this.config.moveSpeed);
         }
         if (this.state.keys.d) {
-            this.state.playerPos = Math.min(this.config.stageWidth - 100, this.state.playerPos + this.config.moveSpeed);
+            this.state.playerPos = Math.min(this.config.stageWidth - 80, this.state.playerPos + this.config.moveSpeed);
         }
 
         // Pulo
@@ -137,11 +147,11 @@ class StreetFighterGame {
             this.jump();
         }
 
-        // Ataques básicos
-        if (this.state.keys[' '] && !this.state.isAttacking && this.state.playerStamina >= 10) {
+        // Ataques
+        if (this.state.keys.r && !this.state.isAttacking && this.state.playerStamina >= 10) {
             this.attack('punch');
         }
-        if (this.state.keys.s && !this.state.isAttacking && this.state.playerStamina >= 15) {
+        if (this.state.keys.e && !this.state.isAttacking && this.state.playerStamina >= 15) {
             this.attack('kick');
         }
 
@@ -151,6 +161,7 @@ class StreetFighterGame {
         } else if (this.state.isDefending) {
             this.state.isDefending = false;
             this.dom.player.classList.remove('defending');
+            this.dom.player.style.opacity = '1';
         }
 
         // Ataque especial
@@ -160,6 +171,8 @@ class StreetFighterGame {
     }
 
     jump() {
+        if (this.state.isJumping) return;
+        
         this.state.isJumping = true;
         let velocity = this.config.jumpForce;
         let position = 0;
@@ -167,10 +180,14 @@ class StreetFighterGame {
         const jumpInterval = setInterval(() => {
             position += velocity;
             velocity += this.config.gravity;
-            this.dom.player.style.bottom = `${100 + position}px`;
+            
+            // Garante que não passe do chão
+            const newPosition = Math.min(0, position);
+            this.dom.player.style.bottom = `${this.config.groundLevel + newPosition}px`;
 
-            if (position >= 0) {
-                this.dom.player.style.bottom = '100px';
+            // Verifica se voltou ao chão
+            if (newPosition >= 0) {
+                this.dom.player.style.bottom = `${this.config.groundLevel}px`;
                 clearInterval(jumpInterval);
                 this.state.isJumping = false;
             }
@@ -180,19 +197,30 @@ class StreetFighterGame {
     attack(type) {
         this.state.isAttacking = true;
         const damage = type === 'punch' ? 10 : 15;
-        this.state.playerStamina -= type === 'punch' ? 10 : 15;
+        const staminaCost = type === 'punch' ? 10 : 15;
+        
+        this.state.playerStamina -= staminaCost;
 
-        this.dom.player.classList.add('attacking');
+        // Animação de ataque
+        this.dom.player.classList.add('attacking', type);
+        this.dom.player.style.transform = type === 'punch' 
+            ? 'scale(1.05)' 
+            : 'scale(1.08)';
+
         setTimeout(() => {
-            this.dom.player.classList.remove('attacking');
+            this.dom.player.classList.remove('attacking', type);
+            this.dom.player.style.transform = 'scale(1)';
             this.state.isAttacking = false;
-        }, this.config.attackCooldown / 2);
+        }, this.config.attackCooldown);
 
+        // Lógica de hit
         if (this.checkHit()) {
-            this.createHitEffect(this.state.enemyPos + 50, 150);
+            this.createHitEffect(this.state.enemyPos + 40, 150);
             this.state.enemyHP -= damage;
-            this.dom.enemy.classList.add('attacking');
-            setTimeout(() => this.dom.enemy.classList.remove('attacking'), this.config.attackCooldown / 2);
+            
+            // Animação de hit no inimigo
+            this.dom.enemy.classList.add('hit');
+            setTimeout(() => this.dom.enemy.classList.remove('hit'), 200);
             
             if (this.state.enemyHP <= 0) {
                 this.state.enemyHP = 0;
@@ -209,7 +237,7 @@ class StreetFighterGame {
             // Hadouken
             const hadouken = document.createElement('div');
             hadouken.className = 'effect hadouken';
-            hadouken.style.left = `${this.state.playerPos + 100}px`;
+            hadouken.style.left = `${this.state.playerPos + 80}px`;
             hadouken.style.bottom = '150px';
             this.dom.effects.appendChild(hadouken);
             
@@ -217,7 +245,7 @@ class StreetFighterGame {
                 hadouken.remove();
                 if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
                     this.state.enemyHP -= 25;
-                    this.createHitEffect(this.state.enemyPos + 50, 150);
+                    this.createHitEffect(this.state.enemyPos + 40, 150);
                     if (this.state.enemyHP <= 0) {
                         this.state.enemyHP = 0;
                         this.endRound('player');
@@ -228,7 +256,7 @@ class StreetFighterGame {
             // Shoryuken
             const shoryuken = document.createElement('div');
             shoryuken.className = 'effect shoryuken';
-            shoryuken.style.left = `${this.state.playerPos + 50}px`;
+            shoryuken.style.left = `${this.state.playerPos + 40}px`;
             shoryuken.style.bottom = '100px';
             this.dom.effects.appendChild(shoryuken);
             
@@ -236,7 +264,7 @@ class StreetFighterGame {
                 shoryuken.remove();
                 if (Math.abs(this.state.playerPos - this.state.enemyPos) < 150) {
                     this.state.enemyHP -= 30;
-                    this.createHitEffect(this.state.enemyPos + 50, 150);
+                    this.createHitEffect(this.state.enemyPos + 40, 150);
                     if (this.state.enemyHP <= 0) {
                         this.state.enemyHP = 0;
                         this.endRound('player');
@@ -253,6 +281,7 @@ class StreetFighterGame {
     defend() {
         this.state.isDefending = true;
         this.dom.player.classList.add('defending');
+        this.dom.player.style.opacity = '0.7';
     }
 
     enemyAI() {
@@ -296,7 +325,7 @@ class StreetFighterGame {
         }, this.config.attackCooldown / 2);
 
         if (this.checkHit(true) && !this.state.isDefending) {
-            this.createHitEffect(this.state.playerPos + 50, 150);
+            this.createHitEffect(this.state.playerPos + 40, 150);
             this.state.playerHP -= damage;
             
             if (this.state.playerHP <= 0) {
@@ -309,7 +338,7 @@ class StreetFighterGame {
     checkHit(isEnemyAttacking = false) {
         const attackerPos = isEnemyAttacking ? this.state.enemyPos : this.state.playerPos;
         const defenderPos = isEnemyAttacking ? this.state.playerPos : this.state.enemyPos;
-        return Math.abs(attackerPos - defenderPos) < 150;
+        return Math.abs(attackerPos - defenderPos) < 120;
     }
 
     createHitEffect(x, y) {
@@ -379,9 +408,11 @@ class StreetFighterGame {
         this.state.isAttacking = false;
         this.state.enemyIsAttacking = false;
 
-        this.dom.player.classList.remove('defending', 'attacking');
-        this.dom.enemy.classList.remove('attacking');
-        this.dom.player.style.bottom = '100px';
+        this.dom.player.classList.remove('defending', 'attacking', 'punch', 'kick', 'hit');
+        this.dom.enemy.classList.remove('attacking', 'hit');
+        this.dom.player.style.opacity = '1';
+        this.dom.player.style.transform = 'scale(1)';
+        this.dom.player.style.bottom = `${this.config.groundLevel}px`;
     }
 
     showResult() {
@@ -401,28 +432,12 @@ class StreetFighterGame {
     }
 
     resetGame() {
-        this.state = {
-            ...this.state,
-            playerHP: 100,
-            enemyHP: 100,
-            playerStamina: 100,
-            enemyStamina: 100,
-            playerPos: 200,
-            enemyPos: this.config.stageWidth - 280,
-            isJumping: false,
-            isDefending: false,
-            isAttacking: false,
-            enemyIsAttacking: false,
-            timeLeft: this.config.roundTime,
-            round: 1,
-            playerWins: 0,
-            enemyWins: 0,
-            gameActive: false,
-            keys: {}
-        };
-
+        this.state.playerWins = 0;
+        this.state.enemyWins = 0;
+        this.state.round = 1;
         this.dom.resultScreen.classList.add('hidden');
         this.dom.gameScreen.classList.remove('hidden');
+        this.resetCharacters();
         this.startGame();
     }
 
@@ -439,11 +454,8 @@ class StreetFighterGame {
     handleResize() {
         this.config.stageWidth = window.innerWidth;
         this.config.stageHeight = window.innerHeight;
-        
-        if (this.state.gameActive) {
-            this.state.enemyPos = this.config.stageWidth - 280;
-            this.updatePositions();
-        }
+        this.state.enemyPos = this.config.stageWidth - 280;
+        this.updatePositions();
     }
 }
 

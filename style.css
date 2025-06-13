@@ -1,3 +1,4 @@
+/* VARIÁVEIS GLOBAIS */
 :root {
     --blue: #4e7ac7;
     --dark-blue: #3a5a9a;
@@ -10,8 +11,10 @@
     --accent: #e94560;
     --text: #fff;
     --shadow: #000;
+    --ground-level: 100px;
 }
 
+/* RESET & BASE */
 * {
     box-sizing: border-box;
     margin: 0;
@@ -19,7 +22,7 @@
 }
 
 body {
-    font-family: 'Rubik', sans-serif;
+    font-family: 'Press Start 2P', cursive;
     background: var(--bg-dark);
     color: var(--text);
     overflow: hidden;
@@ -52,7 +55,7 @@ body {
     display: none;
 }
 
-/* Tela de Seleção */
+/* TELA DE SELEÇÃO */
 #character-select {
     background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
     z-index: 10;
@@ -63,16 +66,12 @@ body {
     margin-bottom: 2rem;
     color: var(--accent);
     text-shadow: 3px 3px 0 var(--shadow);
-    text-align: center;
 }
 
 .characters {
     display: flex;
-    gap: 2rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    width: 100%;
-    max-width: 800px;
+    gap: 4rem;
+    margin-bottom: 2rem;
 }
 
 .character-card {
@@ -82,7 +81,6 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     width: 300px;
-    max-width: 100%;
     text-align: center;
     border: 3px solid transparent;
 }
@@ -96,7 +94,6 @@ body {
 .character-card h2 {
     font-size: 1.8rem;
     margin: 1rem 0 0.5rem;
-    color: var(--text);
 }
 
 .character-card p {
@@ -121,7 +118,14 @@ body {
     background: var(--red);
 }
 
-/* Tela do Jogo */
+.controls {
+    margin-top: 2rem;
+    font-size: 0.9rem;
+    color: var(--text);
+    text-align: center;
+}
+
+/* TELA DO JOGO */
 #game-screen {
     background: linear-gradient(180deg, var(--bg-dark) 0%, var(--bg-light) 100%);
 }
@@ -132,20 +136,20 @@ body {
     width: 100%;
     padding: 0 2rem;
     z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
 .health-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
     gap: 1rem;
-    width: 100%;
+    width: 80%;
 }
 
 .health-bar {
     flex: 1;
     position: relative;
-    max-width: 400px;
 }
 
 .health-fill {
@@ -171,18 +175,15 @@ body {
 }
 
 .name {
-    font-size: 1rem;
+    font-size: 0.8rem;
     margin-top: 5px;
     text-align: center;
-    color: var(--text);
-    font-weight: bold;
 }
 
 .timer {
     font-size: 1.5rem;
     color: var(--text);
-    font-weight: bold;
-    min-width: 60px;
+    width: 100px;
     text-align: center;
 }
 
@@ -205,7 +206,7 @@ body {
     100% { opacity: 0; transform: translateX(-50%) scale(0.5); }
 }
 
-/* Cenário */
+/* CENÁRIO */
 .stage {
     position: absolute;
     width: 100%;
@@ -213,46 +214,31 @@ body {
     overflow: hidden;
 }
 
-.background {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background: 
-        radial-gradient(circle at 20% 15%, var(--bg-light) 0%, transparent 20%),
-        radial-gradient(circle at 80% 10%, var(--bg-light) 0%, transparent 25%),
-        radial-gradient(circle at 50% 70%, var(--bg-light) 0%, transparent 30%),
-        var(--bg-dark);
-    z-index: 1;
-}
-
 .floor {
     position: absolute;
     bottom: 0;
     width: 100%;
-    height: 100px;
+    height: var(--ground-level);
     background: linear-gradient(0deg, #1a1a2e 0%, var(--bg-dark) 100%);
     z-index: 2;
 }
 
+/* PERSONAGENS */
 .player, .enemy {
     width: 80px;
     height: 160px;
     position: absolute;
-    bottom: 100px;
+    bottom: var(--ground-level);
     z-index: 10;
-    transition: transform 0.1s ease;
+    transition: all 0.1s ease;
 }
 
 .player {
     left: 200px;
-    --color: var(--blue);
-    --dark-color: var(--dark-blue);
 }
 
 .enemy {
     right: 200px;
-    --color: var(--red);
-    --dark-color: var(--dark-red);
 }
 
 .player::before, .enemy::before {
@@ -272,19 +258,35 @@ body {
     position: absolute;
     width: 30px;
     height: 60px;
-    background: var(--color);
-    border: 2px solid var(--dark-color);
     top: 50px;
     left: 25px;
+}
+
+.player.hero::after, .enemy.hero::after {
+    background: var(--blue);
+    border: 2px solid var(--dark-blue);
+}
+
+.player.villain::after, .enemy.villain::after {
+    background: var(--red);
+    border: 2px solid var(--dark-red);
 }
 
 .player .arm, .enemy .arm {
     position: absolute;
     width: 12px;
     height: 40px;
-    background: var(--color);
-    border: 2px solid var(--dark-color);
     top: 50px;
+}
+
+.player.hero .arm, .enemy.hero .arm {
+    background: var(--blue);
+    border: 2px solid var(--dark-blue);
+}
+
+.player.villain .arm, .enemy.villain .arm {
+    background: var(--red);
+    border: 2px solid var(--dark-red);
 }
 
 .player .arm.left, .enemy .arm.left {
@@ -301,9 +303,17 @@ body {
     position: absolute;
     width: 15px;
     height: 50px;
-    background: var(--dark-color);
-    border: 2px solid var(--dark-color);
     top: 110px;
+}
+
+.player.hero .leg, .enemy.hero .leg {
+    background: var(--dark-blue);
+    border: 2px solid var(--dark-blue);
+}
+
+.player.villain .leg, .enemy.villain .leg {
+    background: var(--dark-red);
+    border: 2px solid var(--dark-red);
 }
 
 .player .leg.left, .enemy .leg.left {
@@ -314,7 +324,35 @@ body {
     left: 45px;
 }
 
-/* Efeitos */
+/* ANIMAÇÕES */
+.player.attacking {
+    transition: transform 0.05s ease-out;
+}
+
+.player.punch {
+    transform: scale(1.05);
+}
+
+.player.kick {
+    transform: scale(1.08);
+}
+
+.player.defending {
+    opacity: 0.7;
+    filter: brightness(1.2);
+}
+
+.enemy.hit {
+    animation: hitShake 0.2s ease;
+}
+
+@keyframes hitShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* EFEITOS */
 #effects {
     position: absolute;
     width: 100%;
@@ -366,7 +404,7 @@ body {
     100% { transform: translateY(-400px) scaleY(0); opacity: 0; }
 }
 
-/* Tela de Resultado */
+/* TELA DE RESULTADO */
 #result-screen {
     background: rgba(0, 0, 0, 0.8);
     z-index: 30;
@@ -402,11 +440,15 @@ body {
     transform: scale(1.05);
 }
 
-/* Responsividade */
+/* RESPONSIVIDADE */
 @media (max-width: 768px) {
     .characters {
         flex-direction: column;
-        align-items: center;
+        gap: 2rem;
+    }
+    
+    .character-card {
+        width: 250px;
     }
     
     .health-container {
@@ -415,13 +457,12 @@ body {
     }
     
     .health-bar {
-        max-width: 100%;
+        width: 100%;
     }
     
     .player, .enemy {
         width: 60px;
         height: 120px;
-        bottom: 100px;
     }
     
     .player {
