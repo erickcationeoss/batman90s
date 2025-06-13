@@ -5,249 +5,172 @@ body {
     text-align: center;
     margin: 0;
     padding: 20px;
-    overflow: hidden;
-    user-select: none;
 }
 
 .game-container {
     width: 800px;
     margin: 0 auto;
-    position: relative;
 }
 
 .stage {
     width: 100%;
     height: 300px;
-    background: linear-gradient(to bottom, #1a1a2e, #16213e);
+    background: linear-gradient(to bottom, #333, #000);
     position: relative;
     overflow: hidden;
     border: 4px solid #444;
     margin-top: 20px;
-    border-radius: 8px;
 }
 
-.ground {
+/* Personagem do Jogador */
+.player {
+    width: 80px;
+    height: 180px;
     position: absolute;
     bottom: 0;
-    width: 100%;
-    height: 20px;
-    background: linear-gradient(to right, #4e4e4e, #3a3a3a);
-    z-index: 10;
-}
-
-/* Personagens */
-.player, .enemy {
-    width: 60px;
-    height: 120px;
-    position: absolute;
-    bottom: 20px;
-    transition: all 0.1s ease-out;
-    z-index: 20;
-}
-
-.player {
     left: 100px;
+    transition: all 0.2s ease;
 }
 
-.enemy {
-    right: 100px;
-}
-
-/* Partes do corpo */
-.head {
-    position: absolute;
-    width: 30px;
-    height: 30px;
-    background: #fff;
-    border-radius: 50%;
-    top: 0;
-    left: 15px;
-    z-index: 2;
-}
-
-.body {
-    position: absolute;
+.player .head {
     width: 40px;
-    height: 50px;
-    top: 25px;
-    left: 10px;
-    border-radius: 5px;
-    z-index: 1;
+    height: 40px;
+    background: #3498db;
+    border-radius: 50%;
+    position: absolute;
+    top: 0;
+    left: 20px;
 }
 
 .player .body {
-    background: #3498db;
-    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
-}
-
-.enemy .body {
-    background: #e74c3c;
-    box-shadow: 0 0 10px rgba(231, 76, 60, 0.5);
-}
-
-.arm {
+    width: 30px;
+    height: 60px;
+    background: #2980b9;
     position: absolute;
-    width: 15px;
-    height: 40px;
-    top: 30px;
-    border-radius: 5px;
-}
-
-.left-arm {
-    left: 5px;
-}
-
-.right-arm {
-    right: 5px;
+    top: 40px;
+    left: 25px;
 }
 
 .player .arm {
-    background: #2980b9;
-}
-
-.enemy .arm {
-    background: #c0392b;
-}
-
-.leg {
-    position: absolute;
     width: 15px;
     height: 40px;
-    top: 70px;
-    border-radius: 3px;
-}
-
-.left-leg {
-    left: 15px;
-}
-
-.right-leg {
-    right: 15px;
-}
-
-.player .leg {
     background: #2980b9;
+    position: absolute;
+    top: 45px;
 }
 
-.enemy .leg {
-    background: #c0392b;
-}
-
-/* Estados */
-.defending .body {
-    box-shadow: 0 0 20px #f1c40f;
-    filter: brightness(0.8);
-}
-
-.attacking .right-arm {
-    transform: rotate(-45deg) translateX(-5px);
+.player .left-arm {
+    left: 10px;
     transform-origin: top center;
 }
 
-.jumping {
-    transform: translateY(-5px);
+.player .right-arm {
+    left: 55px;
+    transform-origin: top center;
 }
 
-.hurt {
-    animation: hurtFlash 0.3s;
+.player .leg {
+    width: 20px;
+    height: 50px;
+    background: #1a5276;
+    position: absolute;
+    top: 100px;
 }
 
-@keyframes hurtFlash {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.5); }
+.player .left-leg {
+    left: 20px;
 }
 
-/* Barras de vida */
-.info {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-    font-size: 16px;
-    background: rgba(0, 0, 0, 0.5);
-    padding: 10px;
-    border-radius: 8px;
+.player .right-leg {
+    left: 40px;
 }
 
-.health-bar-container {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    width: 30%;
+/* Inimigo */
+.enemy {
+    width: 80px;
+    height: 180px;
+    position: absolute;
+    bottom: 0;
+    right: 100px;
+    transition: all 0.3s ease-out;
 }
 
-.score-display {
-    font-size: 18px;
-    font-weight: bold;
-}
-
-.health-bar {
-    flex-grow: 1;
-    height: 20px;
-    background: #333;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-.health-fill {
-    height: 100%;
-    width: 100%;
-    transition: width 0.3s ease;
-}
-
-#player-health-fill {
-    background: linear-gradient(to right, #2ecc71, #27ae60);
-}
-
-#enemy-health-fill {
-    background: linear-gradient(to right, #e74c3c, #c0392b);
-}
-
-/* Tela de Game Over */
-.game-over-screen {
+.enemy .head {
+    width: 40px;
+    height: 40px;
+    background: #e74c3c;
+    border-radius: 50%;
     position: absolute;
     top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    z-index: 100;
+    left: 20px;
 }
 
-.game-over-screen h2 {
-    font-size: 48px;
-    margin-bottom: 20px;
-    color: #f1c40f;
-    text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+.enemy .body {
+    width: 30px;
+    height: 60px;
+    background: #c0392b;
+    position: absolute;
+    top: 40px;
+    left: 25px;
 }
 
-.game-over-screen p {
-    font-size: 24px;
-    margin-bottom: 30px;
+.enemy .arm {
+    width: 15px;
+    height: 40px;
+    background: #c0392b;
+    position: absolute;
+    top: 45px;
 }
 
-#restart-button {
-    padding: 12px 30px;
+.enemy .left-arm {
+    left: 10px;
+    transform-origin: top center;
+}
+
+.enemy .right-arm {
+    left: 55px;
+    transform-origin: top center;
+}
+
+.enemy .leg {
+    width: 20px;
+    height: 50px;
+    background: #922b21;
+    position: absolute;
+    top: 100px;
+}
+
+.enemy .left-leg {
+    left: 20px;
+}
+
+.enemy .right-leg {
+    left: 40px;
+}
+
+/* Animações */
+.player.defending {
+    filter: brightness(0.7);
+    border: 3px solid #f1c40f;
+}
+
+.player.attacking .right-arm {
+    animation: punch 0.3s ease;
+}
+
+.enemy.attacking .left-arm {
+    animation: punch 0.3s ease;
+}
+
+@keyframes punch {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(-60deg); }
+    100% { transform: rotate(0deg); }
+}
+
+.info {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 10px;
     font-size: 18px;
-    background: #3498db;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-#restart-button:hover {
-    background: #2980b9;
-    transform: scale(1.05);
-}
-
-.controls {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #aaa;
 }

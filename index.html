@@ -1,31 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Street Fight</title>
+    <title>Luta Premium</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="game-container">
         <h1>Luta Acadêmica Premium</h1>
         <div class="info">
-            <div class="health-bar-container">
-                <span>HERÓI:</span>
-                <div class="health-bar" id="player-health-bar">
-                    <div class="health-fill" id="player-health-fill"></div>
-                </div>
-                <span id="player-health-text">100</span>
-            </div>
-            <div class="score-display">Pontos: <span id="score">0</span></div>
-            <div class="health-bar-container">
-                <span>VILÃO:</span>
-                <div class="health-bar" id="enemy-health-bar">
-                    <div class="health-fill" id="enemy-health-fill"></div>
-                </div>
-                <span id="enemy-health-text">100</span>
-            </div>
+            <span>Pontos: <span id="score">0</span></span>
+            <span>HP: <span id="health">100</span></span>
+            <span>Stamina: <span id="stamina">100</span></span>
         </div>
-        
         <div class="stage">
+            <!-- Personagem do Jogador -->
             <div class="player" id="player">
                 <div class="head"></div>
                 <div class="body"></div>
@@ -34,6 +22,8 @@
                 <div class="leg left-leg"></div>
                 <div class="leg right-leg"></div>
             </div>
+            
+            <!-- Inimigo -->
             <div class="enemy" id="enemy">
                 <div class="head"></div>
                 <div class="body"></div>
@@ -42,17 +32,6 @@
                 <div class="leg left-leg"></div>
                 <div class="leg right-leg"></div>
             </div>
-            <div class="ground"></div>
-        </div>
-        
-        <div class="controls">
-            <p>A/D = Mover | W = Pular | Espaço = Soco | S = Chute | F = Defender</p>
-        </div>
-        
-        <div class="game-over-screen" id="game-over-screen">
-            <h2 id="result-message">Você Venceu!</h2>
-            <p id="final-score">Pontuação: 0</p>
-            <button id="restart-button">Jogar Novamente</button>
         </div>
     </div>
     <script src="game.js"></script>
