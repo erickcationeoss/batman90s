@@ -1,80 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Street Fighter Revival</title>
+    <title>Minimal Fighter</title>
     <link rel="stylesheet" href="style.css">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Tela de Seleção -->
-    <div id="character-select" class="screen">
-        <h1>ESCOLHA SEU GUERREIRO</h1>
+    <div id="character-select">
+        <h1>MINIMAL FIGHTER</h1>
         <div class="characters">
-            <div class="character" id="hero" onclick="selectCharacter('hero')">
-                <div class="sprite">
-                    <div class="head"></div>
-                    <div class="body"></div>
-                    <div class="arm left"></div>
-                    <div class="arm right"></div>
-                    <div class="leg left"></div>
-                    <div class="leg right"></div>
-                </div>
-                <p>RYU</p>
-                <div class="special">Hadouken: Tecla Q</div>
+            <div class="character-card" id="hero">
+                <div class="character-preview" id="hero-preview"></div>
+                <h2>BLUE</h2>
+                <p>Special: Energy Wave (Q)</p>
             </div>
-            <div class="character" id="villain" onclick="selectCharacter('villain')">
-                <div class="sprite">
-                    <div class="head"></div>
-                    <div class="body"></div>
-                    <div class="arm left"></div>
-                    <div class="arm right"></div>
-                    <div class="leg left"></div>
-                    <div class="leg right"></div>
-                </div>
-                <p>VEGA</p>
-                <div class="special">Arranhão: Tecla Q</div>
+            <div class="character-card" id="villain">
+                <div class="character-preview" id="villain-preview"></div>
+                <h2>RED</h2>
+                <p>Special: Dash Attack (Q)</p>
             </div>
         </div>
+        <div class="instructions">Click to select character</div>
     </div>
 
-    <!-- Tela do Jogo -->
-    <div id="game-screen" class="game-container" style="display:none;">
-        <div class="health-bars">
-            <div class="health-bar">
-                <div class="health" id="player-health"></div>
-                <div class="name" id="player-name">RYU</div>
+    <div id="game-screen">
+        <div class="ui-container">
+            <div class="health-container">
+                <div class="health-bar" id="player-health"></div>
+                <div class="health-bar" id="enemy-health"></div>
             </div>
-            <div class="timer">99</div>
-            <div class="health-bar">
-                <div class="health" id="enemy-health"></div>
-                <div class="name" id="enemy-name">VEGA</div>
-            </div>
-        </div>
-        
-        <div class="stage">
-            <div class="player" id="player">
-                <div class="head"></div>
-                <div class="body"></div>
-                <div class="arm left"></div>
-                <div class="arm right"></div>
-                <div class="leg left"></div>
-                <div class="leg right"></div>
-            </div>
-            <div class="enemy" id="enemy">
-                <div class="head"></div>
-                <div class="body"></div>
-                <div class="arm left"></div>
-                <div class="arm right"></div>
-                <div class="leg left"></div>
-                <div class="leg right"></div>
-            </div>
-            <div class="floor"></div>
-            <div id="effects"></div>
+            <div class="timer">60</div>
         </div>
 
-        <div class="round">ROUND 1</div>
+        <div class="stage">
+            <div class="player" id="player"></div>
+            <div class="enemy" id="enemy"></div>
+            <div class="stage-background"></div>
+            <div id="effects"></div>
+        </div>
     </div>
 
     <script src="game.js"></script>
