@@ -2,19 +2,23 @@ body {
     font-family: 'Arial', sans-serif;
     background: #111;
     color: white;
-    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
     margin: 0;
     padding: 20px;
+    overflow: hidden;
 }
 
 .game-container {
     width: 800px;
-    margin: 0 auto;
+    text-align: center;
 }
 
 .stage {
-    width: 100%;
-    height: 300px;
+    width: 800px;
+    height: 400px;
     background: linear-gradient(to bottom, #333, #000);
     position: relative;
     overflow: hidden;
@@ -22,41 +26,56 @@ body {
     margin-top: 20px;
 }
 
-/* Personagem do Jogador */
+/* Batman */
 .player {
     width: 80px;
-    height: 180px;
+    height: 200px;
     position: absolute;
     bottom: 0;
     left: 100px;
-    transition: all 0.2s ease;
+    transition: all 0.1s ease;
+    z-index: 10;
 }
 
 .player .head {
     width: 40px;
     height: 40px;
-    background: #3498db;
+    background: #333;
     border-radius: 50%;
     position: absolute;
     top: 0;
     left: 20px;
+    z-index: 3;
+}
+
+.player .cape {
+    width: 70px;
+    height: 120px;
+    background: #111;
+    position: absolute;
+    top: 30px;
+    left: 5px;
+    z-index: 1;
+    clip-path: polygon(0 0, 100% 0, 80% 100%, 20% 100%);
 }
 
 .player .body {
     width: 30px;
-    height: 60px;
-    background: #2980b9;
+    height: 70px;
+    background: #222;
     position: absolute;
     top: 40px;
     left: 25px;
+    z-index: 2;
 }
 
 .player .arm {
     width: 15px;
-    height: 40px;
-    background: #2980b9;
+    height: 50px;
+    background: #222;
     position: absolute;
     top: 45px;
+    z-index: 2;
 }
 
 .player .left-arm {
@@ -71,10 +90,11 @@ body {
 
 .player .leg {
     width: 20px;
-    height: 50px;
-    background: #1a5276;
+    height: 60px;
+    background: #111;
     position: absolute;
-    top: 100px;
+    top: 110px;
+    z-index: 2;
 }
 
 .player .left-leg {
@@ -85,20 +105,20 @@ body {
     left: 40px;
 }
 
-/* Inimigo */
+/* Coringa */
 .enemy {
     width: 80px;
-    height: 180px;
+    height: 200px;
     position: absolute;
     bottom: 0;
     right: 100px;
-    transition: all 0.3s ease-out;
+    transition: all 0.2s ease-out;
 }
 
 .enemy .head {
     width: 40px;
     height: 40px;
-    background: #e74c3c;
+    background: #f1c40f;
     border-radius: 50%;
     position: absolute;
     top: 0;
@@ -107,8 +127,8 @@ body {
 
 .enemy .body {
     width: 30px;
-    height: 60px;
-    background: #c0392b;
+    height: 70px;
+    background: #8e44ad;
     position: absolute;
     top: 40px;
     left: 25px;
@@ -116,8 +136,8 @@ body {
 
 .enemy .arm {
     width: 15px;
-    height: 40px;
-    background: #c0392b;
+    height: 50px;
+    background: #9b59b6;
     position: absolute;
     top: 45px;
 }
@@ -134,10 +154,10 @@ body {
 
 .enemy .leg {
     width: 20px;
-    height: 50px;
-    background: #922b21;
+    height: 60px;
+    background: #8e44ad;
     position: absolute;
-    top: 100px;
+    top: 110px;
 }
 
 .enemy .left-leg {
@@ -151,15 +171,15 @@ body {
 /* Animações */
 .player.defending {
     filter: brightness(0.7);
-    border: 3px solid #f1c40f;
+    transform: scaleX(1.1);
 }
 
 .player.attacking .right-arm {
-    animation: punch 0.3s ease;
+    animation: punch 0.2s ease;
 }
 
 .enemy.attacking .left-arm {
-    animation: punch 0.3s ease;
+    animation: punch 0.2s ease;
 }
 
 @keyframes punch {
@@ -171,6 +191,6 @@ body {
 .info {
     display: flex;
     justify-content: space-around;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
     font-size: 18px;
 }
