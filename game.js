@@ -1,4 +1,4 @@
-// Variáveis do jogo
+// Variáveis globais
 let playerCharacter = null;
 let playerHP = 100;
 let enemyHP = 100;
@@ -8,6 +8,7 @@ let isAttacking = false;
 let playerPos = 100;
 let enemyPos = 620;
 let enemyDirection = -1;
+let gameActive = false;
 
 // Elementos DOM
 const characterSelect = document.getElementById('character-select');
@@ -18,7 +19,10 @@ const playerHealthBar = document.getElementById('player-health');
 const enemyHealthBar = document.getElementById('enemy-health');
 const effectsContainer = document.getElementById('effects');
 
-// Seleção de Personagem
+// Inicialização
+document.getElementById('hero').addEventListener('click', () => selectCharacter('hero'));
+document.getElementById('villain').addEventListener('click', () => selectCharacter('villain'));
+
 function selectCharacter(character) {
     playerCharacter = character;
     characterSelect.style.display = 'none';
@@ -26,63 +30,79 @@ function selectCharacter(character) {
     startGame();
 }
 
-// Inicia o jogo
 function startGame() {
+    gameActive = true;
     updateUI();
-    gameLoop();
+    requestAnimationFrame(gameLoop);
 }
 
-// Atualiza a interface
 function updateUI() {
     playerHealthBar.style.width = `${playerHP}%`;
     enemyHealthBar.style.width = `${enemyHP}%`;
 }
 
-// Loop principal
-function gameLoop() {
-    requestAnimationFrame(gameLoop);
-    enemyAI();
-}
-
 // Controles
+const keys = {
+    a: false,
+    d: false,
+    w: false,
+    ' ': false,
+    s: false,
+    f: false
+};
+
 document.addEventListener('keydown', (e) => {
+    if (!gameActive) return;
     const key = e.key.toLowerCase();
-    if (key === 'a' && playerPos > 0) playerPos -= 10;
-    if (key === 'd' && playerPos < 800 - 80) playerPos += 10;
-    if (key === 'w' && !isJumping) jump();
-    if (key === ' ' && !isAttacking) attack('punch');
-    if (key === 's' && !isAttacking) attack('kick');
-    if (key === 'f') defend();
-    playerElement.style.left = playerPos + 'px';
+    if (key in keys) keys[key] = true;
 });
 
 document.addEventListener('keyup', (e) => {
-    if (e.key.toLowerCase() === 'f') {
-        isDefending = false;
-        playerElement.classList.remove('defending');
-    }
+    const key = e.key.toLowerCase();
+    if (key in keys) keys[key] = false;
+    if (key === 'f') isDefending = false;
 });
 
-// Pulo
+// Loop principal
+function gameLoop() {
+    if (!gameActive) return;
+    
+    // Movimento do jogador
+    if (keys.a) playerPos = Math.max(0, playerPos - 5);
+    if (keys.d) playerPos = Math.min(720, playerPos + 5);
+    if (keys.w && !isJumping) jump();
+    if (keys[' '] && !isAttacking) attack('punch');
+    if (keys.s && !isAttacking) attack('kick');
+    if (keys.f) defend();
+
+    playerElement.style.left = `${playerPos}px`;
+    
+    // IA do inimigo
+    enemyAI();
+    
+    requestAnimationFrame(gameLoop);
+}
+
+// Sistema de pulo
 function jump() {
     isJumping = true;
-    let velocity = -15;
+    let velocity = -12;
     let position = 0;
 
     const jumpInterval = setInterval(() => {
         position += velocity;
-        velocity += 0.8;
-        playerElement.style.bottom = (20 + position) + 'px';
+        velocity += 0.7;
+        playerElement.style.bottom = `${20 + position}px`;
 
         if (position >= 0) {
             playerElement.style.bottom = '20px';
             clearInterval(jumpInterval);
             isJumping = false;
         }
-    }, 20);
+    }, 16);
 }
 
-// Ataque
+// Sistema de ataque
 function attack(type) {
     isAttacking = true;
     const damage = type === 'punch' ? 10 : 15;
@@ -93,46 +113,30 @@ function attack(type) {
         isAttacking = false;
     }, 200);
 
-    if (Math.abs(playerPos - enemyPos) < 120) {
+    if (Math.abs(playerPos - enemyPos) < 100) {
         createHitEffect(enemyPos + 40, 100);
         enemyHP -= damage;
         enemyElement.classList.add('attacking');
         setTimeout(() => enemyElement.classList.remove('attacking'), 200);
         
-        if (enemyHP <= 0) {
-            enemyHP = 0;
-            endGame();
-        }
+        if (enemyHP <= 0) endGame(false);
     }
     updateUI();
 }
 
-// Defesa
+// Sistema de defesa
 function defend() {
     isDefending = true;
     playerElement.classList.add('defending');
 }
 
-// Efeito de hit
-function createHitEffect(x, y) {
-    const effect = document.createElement('div');
-    effect.className = 'effect hit-effect';
-    effect.style.left = `${x - 25}px`;
-    effect.style.top = `${y - 25}px`;
-    effectsContainer.appendChild(effect);
-    
-    setTimeout(() => {
-        effect.remove();
-    }, 300);
-}
-
-// IA do Inimigo
+// IA do inimigo (agora funcional)
 function enemyAI() {
-    // Movimento
-    enemyPos += enemyDirection * 3;
-
+    // Movimento básico
+    enemyPos += enemyDirection * 2;
+    
     // Mudança de direção
-    if (enemyPos <= 0 || enemyPos >= 800 - 80) {
+    if (enemyPos <= 0 || enemyPos >= 720) {
         enemyDirection *= -1;
     }
 
@@ -141,39 +145,51 @@ function enemyAI() {
         enemyAttack();
     }
 
-    enemyElement.style.left = enemyPos + 'px';
+    enemyElement.style.left = `${enemyPos}px`;
 }
 
-// Ataque do Inimigo
 function enemyAttack() {
     enemyElement.classList.add('attacking');
     setTimeout(() => {
         enemyElement.classList.remove('attacking');
-        if (Math.abs(playerPos - enemyPos) < 120 && !isDefending) {
+        if (Math.abs(playerPos - enemyPos) < 100 && !isDefending) {
             createHitEffect(playerPos + 40, 100);
             playerHP -= 10;
-            
-            if (playerHP <= 0) {
-                playerHP = 0;
-                endGame();
-            }
+            if (playerHP <= 0) endGame(true);
+            updateUI();
         }
     }, 200);
 }
 
-// Finaliza o jogo
-function endGame() {
-    alert(playerHP <= 0 ? "Você perdeu!" : "Você venceu!");
-    resetGame();
+// Efeitos visuais
+function createHitEffect(x, y) {
+    const effect = document.createElement('div');
+    effect.className = 'effect hit-effect';
+    effect.style.left = `${x - 25}px`;
+    effect.style.top = `${y - 25}px`;
+    effectsContainer.appendChild(effect);
+    setTimeout(() => effect.remove(), 300);
 }
 
-// Reinicia o jogo
+// Final do jogo
+function endGame(playerLost) {
+    gameActive = false;
+    setTimeout(() => {
+        alert(playerLost ? "Você perdeu!" : "Você venceu!");
+        resetGame();
+    }, 500);
+}
+
 function resetGame() {
     playerHP = 100;
     enemyHP = 100;
     playerPos = 100;
     enemyPos = 620;
-    playerElement.style.left = playerPos + 'px';
-    enemyElement.style.left = enemyPos + 'px';
+    playerElement.style.left = `${playerPos}px`;
+    enemyElement.style.left = `${enemyPos}px`;
+    playerElement.classList.remove('defending', 'attacking');
+    enemyElement.classList.remove('attacking');
     updateUI();
+    characterSelect.style.display = 'flex';
+    gameScreen.style.display = 'none';
 }
