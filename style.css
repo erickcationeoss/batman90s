@@ -1,156 +1,167 @@
-/* Estilo Minimalista */
+/* Estilo Minimalista com Cores Pastéis */
 body {
-    font-family: 'Rubik', sans-serif;
-    background: #f5f5f5;
+    font-family: 'Press Start 2P', cursive;
+    background: #f0f4f8;
+    color: #2d3748;
     margin: 0;
-    padding: 0;
     overflow: hidden;
-    color: #333;
+}
+
+.screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 /* Tela de Seleção */
-#character-select {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
-    transition: all 0.5s ease;
-}
-
 #character-select h1 {
-    font-size: 3rem;
-    margin-bottom: 2rem;
-    color: #00796b;
-    font-weight: 700;
+    color: #4a5568;
+    text-shadow: 2px 2px 0 #cbd5e0;
+    margin-bottom: 50px;
+    font-size: 24px;
 }
 
 .characters {
     display: flex;
-    gap: 3rem;
+    gap: 100px;
 }
 
-.character-card {
-    background: rgba(255, 255, 255, 0.8);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    text-align: center;
+.character {
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    width: 200px;
+    text-align: center;
+    transition: transform 0.2s;
 }
 
-.character-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+.character:hover {
+    transform: scale(1.1);
 }
 
-.character-preview {
+.character .sprite {
     width: 120px;
     height: 180px;
-    margin: 0 auto 1rem;
     position: relative;
+    margin: 0 auto 20px;
+    border: 4px solid #a0aec0;
+    background: #edf2f7;
 }
 
-#hero-preview {
-    background: #64b5f6;
-    border: 4px solid #1976d2;
-}
-
-#villain-preview {
-    background: #ef9a9a;
-    border: 4px solid #d32f2f;
-}
-
-.instructions {
-    margin-top: 2rem;
-    font-size: 1.2rem;
-    color: #00796b;
-}
-
-/* Tela do Jogo */
-#game-screen {
-    display: none;
-    width: 100vw;
-    height: 100vh;
-}
-
-.ui-container {
+/* Elementos dos Personagens */
+.head {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
     position: absolute;
-    top: 20px;
-    width: 100%;
-    padding: 0 2rem;
+    top: 10px;
+    left: 40px;
+}
+
+.body {
+    width: 30px;
+    height: 60px;
+    position: absolute;
+    top: 50px;
+    left: 45px;
+}
+
+.arm {
+    width: 12px;
+    height: 40px;
+    position: absolute;
+    top: 50px;
+}
+
+.arm.left { left: 33px; }
+.arm.right { left: 75px; }
+
+.leg {
+    width: 15px;
+    height: 50px;
+    position: absolute;
+    top: 110px;
+}
+
+.leg.left { left: 42px; }
+.leg.right { left: 63px; }
+
+/* Herói */
+#hero .head { background: #f5d7b3; border: 2px solid #d4a574; }
+#hero .body { background: #90cdf4; border: 2px solid #4299e1; }
+#hero .arm { background: #90cdf4; border: 2px solid #4299e1; }
+#hero .leg { background: #63b3ed; border: 2px solid #3182ce; }
+
+/* Vilão */
+#villain .head { background: #f5d7b3; border: 2px solid #d4a574; }
+#villain .body { background: #feb2b2; border: 2px solid #f56565; }
+#villain .arm { background: #feb2b2; border: 2px solid #f56565; }
+#villain .leg { background: #fc8181; border: 2px solid #e53e3e; }
+
+/* Jogo */
+.game-container {
+    width: 800px;
+    margin: 0 auto;
+    padding-top: 20px;
+}
+
+.health-bars {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    z-index: 100;
-}
-
-.health-container {
-    display: flex;
-    gap: 1rem;
-    width: 80%;
+    margin-bottom: 10px;
 }
 
 .health-bar {
+    width: 350px;
+}
+
+.health {
     height: 20px;
-    border-radius: 10px;
-    transition: width 0.3s ease;
+    border: 2px solid #a0aec0;
+    transition: width 0.3s;
 }
 
 #player-health {
-    background: #64b5f6;
+    background: #90cdf4;
 }
 
 #enemy-health {
-    background: #ef9a9a;
+    background: #feb2b2;
 }
 
-.timer {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #00796b;
+.name {
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: center;
+    color: #4a5568;
 }
 
-/* Cenário */
 .stage {
-    width: 100%;
-    height: 100%;
+    width: 800px;
+    height: 300px;
+    background: #bee3f8;
     position: relative;
     overflow: hidden;
+    border: 8px solid #a0aec0;
 }
 
-.stage-background {
+.floor {
     position: absolute;
+    bottom: 0;
     width: 100%;
-    height: 100%;
-    background: linear-gradient(180deg, #b2ebf2 0%, #4dd0e1 100%);
-    z-index: -1;
+    height: 20px;
+    background: #e2e8f0;
 }
 
-/* Personagens */
 .player, .enemy {
     width: 80px;
     height: 150px;
     position: absolute;
-    bottom: 50px;
-    border-radius: 5px;
-    transition: all 0.1s ease;
+    bottom: 20px;
+    transition: all 0.1s;
 }
 
-.player {
-    left: 100px;
-    background: #64b5f6;
-    box-shadow: 0 4px 10px rgba(25, 118, 210, 0.3);
-}
-
-.enemy {
-    right: 100px;
-    background: #ef9a9a;
-    box-shadow: 0 4px 10px rgba(211, 47, 47, 0.3);
-}
+.player { left: 100px; }
+.enemy { right: 100px; }
 
 /* Efeitos */
 .effect {
@@ -158,17 +169,15 @@ body {
     pointer-events: none;
 }
 
-/* Efeito de ataque especial */
-.special-effect {
-    width: 100px;
-    height: 40px;
-    background: rgba(255, 255, 255, 0.7);
-    border-radius: 20px;
-    animation: special 0.5s forwards;
+.hit-effect {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 237, 213, 0.7);
+    border-radius: 50%;
+    animation: hit 0.3s forwards;
 }
 
-@keyframes special {
-    0% { transform: scaleX(0); opacity: 1; }
-    50% { transform: scaleX(1.2); opacity: 1; }
-    100% { transform: scaleX(0); opacity: 0; }
+@keyframes hit {
+    0% { transform: scale(0); opacity: 1; }
+    100% { transform: scale(2); opacity: 0; }
 }

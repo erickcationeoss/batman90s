@@ -1,41 +1,73 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Minimal Fighter</title>
+    <title>Street Fighter Revival</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    </style>
 </head>
 <body>
-    <div id="character-select">
-        <h1>MINIMAL FIGHTER</h1>
+    <!-- Tela de Seleção -->
+    <div id="character-select" class="screen">
+        <h1>ESCOLHA SEU PERSONAGEM</h1>
         <div class="characters">
-            <div class="character-card" id="hero">
-                <div class="character-preview" id="hero-preview"></div>
-                <h2>BLUE</h2>
-                <p>Special: Energy Wave (Q)</p>
+            <div class="character" id="hero" onclick="selectCharacter('hero')">
+                <div class="sprite">
+                    <div class="head"></div>
+                    <div class="body"></div>
+                    <div class="arm left"></div>
+                    <div class="arm right"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+                <p>HERÓI</p>
             </div>
-            <div class="character-card" id="villain">
-                <div class="character-preview" id="villain-preview"></div>
-                <h2>RED</h2>
-                <p>Special: Dash Attack (Q)</p>
+            <div class="character" id="villain" onclick="selectCharacter('villain')">
+                <div class="sprite">
+                    <div class="head"></div>
+                    <div class="body"></div>
+                    <div class="arm left"></div>
+                    <div class="arm right"></div>
+                    <div class="leg left"></div>
+                    <div class="leg right"></div>
+                </div>
+                <p>VILÃO</p>
             </div>
         </div>
-        <div class="instructions">Click to select character</div>
     </div>
 
-    <div id="game-screen">
-        <div class="ui-container">
-            <div class="health-container">
-                <div class="health-bar" id="player-health"></div>
-                <div class="health-bar" id="enemy-health"></div>
+    <!-- Tela do Jogo -->
+    <div id="game-screen" class="game-container" style="display:none;">
+        <div class="health-bars">
+            <div class="health-bar">
+                <div class="health" id="player-health"></div>
+                <div class="name">PLAYER 1</div>
             </div>
-            <div class="timer">60</div>
+            <div class="health-bar">
+                <div class="health" id="enemy-health"></div>
+                <div class="name">PLAYER 2</div>
+            </div>
         </div>
-
+        
         <div class="stage">
-            <div class="player" id="player"></div>
-            <div class="enemy" id="enemy"></div>
-            <div class="stage-background"></div>
+            <div class="player" id="player">
+                <div class="head"></div>
+                <div class="body"></div>
+                <div class="arm left"></div>
+                <div class="arm right"></div>
+                <div class="leg left"></div>
+                <div class="leg right"></div>
+            </div>
+            <div class="enemy" id="enemy">
+                <div class="head"></div>
+                <div class="body"></div>
+                <div class="arm left"></div>
+                <div class="arm right"></div>
+                <div class="leg left"></div>
+                <div class="leg right"></div>
+            </div>
+            <div class="floor"></div>
             <div id="effects"></div>
         </div>
     </div>
