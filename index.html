@@ -1,38 +1,27 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Batman Fight</title>
+    <title>Street Fighter Revival</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+    </style>
 </head>
 <body>
     <div class="game-container">
-        <h1>Batman vs Coringa</h1>
+        <h1>STREET FIGHTER REVIVAL</h1>
         <div class="info">
-            <span>Pontos: <span id="score">0</span></span>
-            <span>HP: <span id="health">100</span></span>
-            <span>Stamina: <span id="stamina">100</span></span>
+            <span>P1: <span id="health">100</span>%</span>
+            <span>STAMINA: <span id="stamina">100</span></span>
+            <span>P2: <span id="enemy-health">100</span>%</span>
         </div>
         <div class="stage">
-            <!-- Batman -->
-            <div class="player" id="player">
-                <div class="head"></div>
-                <div class="cape"></div>
-                <div class="body"></div>
-                <div class="arm left-arm"></div>
-                <div class="arm right-arm"></div>
-                <div class="leg left-leg"></div>
-                <div class="leg right-leg"></div>
-            </div>
-            
-            <!-- Coringa -->
-            <div class="enemy" id="enemy">
-                <div class="head"></div>
-                <div class="body"></div>
-                <div class="arm left-arm"></div>
-                <div class="arm right-arm"></div>
-                <div class="leg left-leg"></div>
-                <div class="leg right-leg"></div>
-            </div>
+            <div class="player" id="player"></div>
+            <div class="enemy" id="enemy"></div>
+            <div class="floor"></div>
+        </div>
+        <div class="controls">
+            <p>CONTROLES: ← → MOVER | ↑ PULAR | ESPAÇO SOCO | S CHUTE | F DEFESA</p>
         </div>
     </div>
     <script src="game.js"></script>

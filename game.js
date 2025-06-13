@@ -1,33 +1,32 @@
-// Configurações do jogo
+// Configurações
 const player = document.getElementById('player');
 const enemy = document.getElementById('enemy');
 const stageWidth = 800;
 let playerHP = 100;
 let enemyHP = 100;
-let score = 0;
 let stamina = 100;
 let isJumping = false;
 let isDefending = false;
 let isAttacking = false;
 let playerPos = 100;
 let enemyPos = 620;
-let enemySpeed = 0;
 let enemyDirection = -1;
+let enemySpeed = 0;
 
 // Inicia o jogo
-function initGame() {
-    updateDisplay();
+function init() {
+    updateUI();
     gameLoop();
 }
 
-// Atualiza a interface
-function updateDisplay() {
+// Atualiza interface
+function updateUI() {
     document.getElementById('health').textContent = playerHP;
-    document.getElementById('score').textContent = score;
+    document.getElementById('enemy-health').textContent = enemyHP;
     document.getElementById('stamina').textContent = stamina;
 }
 
-// Loop principal do jogo
+// Loop principal
 function gameLoop() {
     requestAnimationFrame(gameLoop);
     enemyAI();
@@ -52,9 +51,8 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// Pulo com física
+// Pulo
 function jump() {
-    if (isJumping) return;
     isJumping = true;
     let velocity = -15;
     let position = 0;
@@ -62,10 +60,10 @@ function jump() {
     const jumpInterval = setInterval(() => {
         position += velocity;
         velocity += 0.7;
-        player.style.bottom = position + 'px';
+        player.style.bottom = (20 + position) + 'px';
 
         if (position >= 0) {
-            player.style.bottom = '0';
+            player.style.bottom = '20px';
             clearInterval(jumpInterval);
             isJumping = false;
         }
@@ -86,11 +84,10 @@ function attack(type) {
 
     if (Math.abs(playerPos - enemyPos) < 120) {
         enemyHP -= damage;
-        score += damage;
-        enemy.style.filter = 'brightness(1.5)';
-        setTimeout(() => enemy.style.filter = 'brightness(1)', 200);
+        enemy.classList.add('attacking');
+        setTimeout(() => enemy.classList.remove('attacking'), 200);
     }
-    updateDisplay();
+    updateUI();
 }
 
 // Defesa
@@ -101,17 +98,16 @@ function defend() {
 
 // IA do Inimigo
 function enemyAI() {
-    // Movimento suave
-    enemySpeed = enemyDirection * 2.5;
+    // Movimento
+    enemySpeed = enemyDirection * 2;
     enemyPos += enemySpeed;
 
-    // Muda de direção
+    // Mudança de direção
     if (enemyPos <= 0 || enemyPos >= stageWidth - 80) {
         enemyDirection *= -1;
-        enemy.style.transform = `scaleX(${enemyDirection > 0 ? 1 : -1})`;
     }
 
-    // Ataque mais agressivo
+    // Ataque
     if (Math.random() < 0.015 && Math.abs(playerPos - enemyPos) < 200) {
         enemyAttack();
     }
@@ -126,12 +122,10 @@ function enemyAttack() {
         enemy.classList.remove('attacking');
         if (Math.abs(playerPos - enemyPos) < 120 && !isDefending) {
             playerHP -= 12;
-            player.style.filter = 'brightness(1.5)';
-            setTimeout(() => player.style.filter = 'brightness(1)', 200);
-            updateDisplay();
+            updateUI();
             
             if (playerHP <= 0) {
-                alert(`Game Over! Pontuação: ${score}`);
+                alert(`GAME OVER!`);
                 resetGame();
             }
         }
@@ -141,21 +135,20 @@ function enemyAttack() {
 // Regenera Stamina
 setInterval(() => {
     if (stamina < 100) stamina += 0.5;
-    updateDisplay();
+    updateUI();
 }, 100);
 
 // Reinicia o jogo
 function resetGame() {
     playerHP = 100;
     enemyHP = 100;
-    score = 0;
     stamina = 100;
     playerPos = 100;
     enemyPos = 620;
     player.style.left = playerPos + 'px';
     enemy.style.left = enemyPos + 'px';
-    updateDisplay();
+    updateUI();
 }
 
-// Inicia o jogo
-initGame();
+// Inicia
+init();
