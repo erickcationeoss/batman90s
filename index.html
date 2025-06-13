@@ -2,44 +2,29 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Street Fighter Revival</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="game-container">
-        <!-- Tela de Seleção -->
+    <div id="app">
         <div id="character-select" class="screen">
             <h1>ESCOLHA SEU LUTADOR</h1>
             <div class="characters">
                 <div class="character-card" id="hero">
-                    <div class="character-preview">
-                        <div class="head"></div>
-                        <div class="body"></div>
-                        <div class="arm left"></div>
-                        <div class="arm right"></div>
-                        <div class="leg left"></div>
-                        <div class="leg right"></div>
-                    </div>
+                    <div class="character-preview"></div>
                     <h2>HERÓI</h2>
                     <p>Ataque Especial: Hadouken (Q)</p>
                 </div>
                 <div class="character-card" id="villain">
-                    <div class="character-preview">
-                        <div class="head"></div>
-                        <div class="body"></div>
-                        <div class="arm left"></div>
-                        <div class="arm right"></div>
-                        <div class="leg left"></div>
-                        <div class="leg right"></div>
-                    </div>
+                    <div class="character-preview"></div>
                     <h2>VILÃO</h2>
                     <p>Ataque Especial: Shoryuken (Q)</p>
                 </div>
             </div>
         </div>
 
-        <!-- Tela do Jogo -->
         <div id="game-screen" class="screen hidden">
             <div class="ui-container">
                 <div class="health-container">
@@ -67,7 +52,6 @@
             </div>
         </div>
 
-        <!-- Tela de Resultado -->
         <div id="result-screen" class="screen hidden">
             <h1 id="result-title">VITÓRIA!</h1>
             <div id="result-message"></div>

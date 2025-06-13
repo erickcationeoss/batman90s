@@ -1,7 +1,41 @@
-class FighterGame {
+class StreetFighterGame {
     constructor() {
+        // Configurações
+        this.config = {
+            stageWidth: window.innerWidth,
+            stageHeight: window.innerHeight,
+            gravity: 0.8,
+            jumpForce: -15,
+            moveSpeed: 5,
+            attackCooldown: 500,
+            specialCooldown: 3000,
+            roundTime: 99
+        };
+
+        // Estado do jogo
+        this.state = {
+            playerCharacter: null,
+            playerHP: 100,
+            enemyHP: 100,
+            playerStamina: 100,
+            enemyStamina: 100,
+            playerPos: 200,
+            enemyPos: window.innerWidth - 280,
+            isJumping: false,
+            isDefending: false,
+            isAttacking: false,
+            enemyIsAttacking: false,
+            timeLeft: this.config.roundTime,
+            round: 1,
+            playerWins: 0,
+            enemyWins: 0,
+            gameActive: false,
+            keys: {}
+        };
+
         // Elementos DOM
         this.dom = {
+            app: document.getElementById('app'),
             characterSelect: document.getElementById('character-select'),
             gameScreen: document.getElementById('game-screen'),
             resultScreen: document.getElementById('result-screen'),
@@ -19,48 +53,6 @@ class FighterGame {
             effects: document.getElementById('effects')
         };
 
-        // Estado do jogo
-        this.state = {
-            playerCharacter: null,
-            playerHP: 100,
-            enemyHP: 100,
-            playerStamina: 100,
-            enemyStamina: 100,
-            playerPos: 200,
-            enemyPos: 700,
-            isJumping: false,
-            isDefending: false,
-            isAttacking: false,
-            enemyIsAttacking: false,
-            timeLeft: 99,
-            round: 1,
-            playerWins: 0,
-            enemyWins: 0,
-            gameActive: false,
-            keys: {
-                a: false,
-                d: false,
-                w: false,
-                ' ': false,
-                s: false,
-                f: false,
-                q: false
-            }
-        };
-
-        // Configurações
-        this.config = {
-            stageWidth: 1000,
-            stageHeight: 600,
-            playerWidth: 100,
-            enemyWidth: 100,
-            gravity: 0.8,
-            jumpForce: -15,
-            moveSpeed: 5,
-            attackCooldown: 500,
-            specialCooldown: 3000
-        };
-
         // Inicialização
         this.init();
     }
@@ -71,8 +63,9 @@ class FighterGame {
         document.getElementById('villain').addEventListener('click', () => this.selectCharacter('villain'));
         this.dom.rematchBtn.addEventListener('click', () => this.resetGame());
 
-        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
-        document.addEventListener('keyup', (e) => this.handleKeyUp(e));
+        window.addEventListener('keydown', (e) => this.handleKeyDown(e));
+        window.addEventListener('keyup', (e) => this.handleKeyUp(e));
+        window.addEventListener('resize', () => this.handleResize());
 
         // Inicia o loop do jogo
         requestAnimationFrame(() => this.gameLoop());
@@ -82,6 +75,11 @@ class FighterGame {
         this.state.playerCharacter = character;
         this.dom.characterSelect.classList.add('hidden');
         this.dom.gameScreen.classList.remove('hidden');
+        
+        // Ajusta posições baseado no tamanho da tela
+        this.state.playerPos = 200;
+        this.state.enemyPos = this.config.stageWidth - 280;
+        
         this.startGame();
     }
 
@@ -89,12 +87,12 @@ class FighterGame {
         this.state.gameActive = true;
         this.updateUI();
         this.startTimer();
-        this.dom.roundDisplay.textContent = `ROUND ${this.state.round}`;
-        setTimeout(() => this.dom.roundDisplay.style.opacity = '0', 2000);
+        this.showRoundDisplay();
     }
 
     startTimer() {
-        this.state.timeLeft = 99;
+        clearInterval(this.timerInterval);
+        this.state.timeLeft = this.config.roundTime;
         this.dom.timer.textContent = this.state.timeLeft;
         
         this.timerInterval = setInterval(() => {
@@ -105,6 +103,14 @@ class FighterGame {
                 this.endRound('timeout');
             }
         }, 1000);
+    }
+
+    showRoundDisplay() {
+        this.dom.roundDisplay.textContent = `ROUND ${this.state.round}`;
+        this.dom.roundDisplay.style.opacity = '1';
+        setTimeout(() => {
+            this.dom.roundDisplay.style.opacity = '0';
+        }, 2000);
     }
 
     gameLoop() {
@@ -123,7 +129,7 @@ class FighterGame {
             this.state.playerPos = Math.max(0, this.state.playerPos - this.config.moveSpeed);
         }
         if (this.state.keys.d) {
-            this.state.playerPos = Math.min(this.config.stageWidth - this.config.playerWidth, this.state.playerPos + this.config.moveSpeed);
+            this.state.playerPos = Math.min(this.config.stageWidth - 100, this.state.playerPos + this.config.moveSpeed);
         }
 
         // Pulo
@@ -142,7 +148,7 @@ class FighterGame {
         // Defesa
         if (this.state.keys.f) {
             this.defend();
-        } else {
+        } else if (this.state.isDefending) {
             this.state.isDefending = false;
             this.dom.player.classList.remove('defending');
         }
@@ -356,12 +362,18 @@ class FighterGame {
 
     nextRound() {
         this.state.round++;
+        this.resetCharacters();
+        this.showRoundDisplay();
+        this.startGame();
+    }
+
+    resetCharacters() {
         this.state.playerHP = 100;
         this.state.enemyHP = 100;
         this.state.playerStamina = 100;
         this.state.enemyStamina = 100;
         this.state.playerPos = 200;
-        this.state.enemyPos = 700;
+        this.state.enemyPos = this.config.stageWidth - 280;
         this.state.isJumping = false;
         this.state.isDefending = false;
         this.state.isAttacking = false;
@@ -370,12 +382,6 @@ class FighterGame {
         this.dom.player.classList.remove('defending', 'attacking');
         this.dom.enemy.classList.remove('attacking');
         this.dom.player.style.bottom = '100px';
-
-        this.dom.roundDisplay.textContent = `ROUND ${this.state.round}`;
-        this.dom.roundDisplay.style.opacity = '1';
-        setTimeout(() => this.dom.roundDisplay.style.opacity = '0', 2000);
-
-        this.startGame();
     }
 
     showResult() {
@@ -396,31 +402,23 @@ class FighterGame {
 
     resetGame() {
         this.state = {
-            playerCharacter: this.state.playerCharacter,
+            ...this.state,
             playerHP: 100,
             enemyHP: 100,
             playerStamina: 100,
             enemyStamina: 100,
             playerPos: 200,
-            enemyPos: 700,
+            enemyPos: this.config.stageWidth - 280,
             isJumping: false,
             isDefending: false,
             isAttacking: false,
             enemyIsAttacking: false,
-            timeLeft: 99,
+            timeLeft: this.config.roundTime,
             round: 1,
             playerWins: 0,
             enemyWins: 0,
             gameActive: false,
-            keys: {
-                a: false,
-                d: false,
-                w: false,
-                ' ': false,
-                s: false,
-                f: false,
-                q: false
-            }
+            keys: {}
         };
 
         this.dom.resultScreen.classList.add('hidden');
@@ -430,18 +428,24 @@ class FighterGame {
 
     handleKeyDown(e) {
         const key = e.key.toLowerCase();
-        if (key in this.state.keys) {
-            this.state.keys[key] = true;
-        }
+        this.state.keys[key] = true;
     }
 
     handleKeyUp(e) {
         const key = e.key.toLowerCase();
-        if (key in this.state.keys) {
-            this.state.keys[key] = false;
+        this.state.keys[key] = false;
+    }
+
+    handleResize() {
+        this.config.stageWidth = window.innerWidth;
+        this.config.stageHeight = window.innerHeight;
+        
+        if (this.state.gameActive) {
+            this.state.enemyPos = this.config.stageWidth - 280;
+            this.updatePositions();
         }
     }
 }
 
 // Inicia o jogo quando a página carregar
-window.onload = () => new FighterGame();
+window.onload = () => new StreetFighterGame();
