@@ -8,22 +8,44 @@
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <h1>STREET FIGHTER REVIVAL</h1>
-        <div class="info">
-            <span>P1: <span id="health">100</span>%</span>
-            <span>STAMINA: <span id="stamina">100</span></span>
-            <span>P2: <span id="enemy-health">100</span>%</span>
+    <!-- Tela de Seleção -->
+    <div id="character-select" class="screen">
+        <h1>ESCOLHA SEU PERSONAGEM</h1>
+        <div class="characters">
+            <div class="character" id="hero" onclick="selectCharacter('hero')">
+                <div class="sprite"></div>
+                <p>HERÓI</p>
+            </div>
+            <div class="character" id="villain" onclick="selectCharacter('villain')">
+                <div class="sprite"></div>
+                <p>VILÃO</p>
+            </div>
         </div>
+    </div>
+
+    <!-- Tela do Jogo -->
+    <div id="game-screen" class="game-container" style="display:none;">
+        <div class="health-bars">
+            <div class="health-bar">
+                <div class="health" id="player-health"></div>
+                <div class="name">PLAYER 1</div>
+            </div>
+            <div class="health-bar">
+                <div class="health" id="enemy-health"></div>
+                <div class="name">PLAYER 2</div>
+            </div>
+        </div>
+        
         <div class="stage">
             <div class="player" id="player"></div>
             <div class="enemy" id="enemy"></div>
             <div class="floor"></div>
+            <div id="effects"></div>
         </div>
-        <div class="controls">
-            <p>CONTROLES: ← → MOVER | ↑ PULAR | ESPAÇO SOCO | S CHUTE | F DEFESA</p>
-        </div>
+
+        <div class="round">ROUND 1</div>
     </div>
+
     <script src="game.js"></script>
 </body>
 </html>
