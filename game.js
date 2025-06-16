@@ -137,9 +137,15 @@ class StreetFighterGame {
         // Movimento
         if (this.state.keys.a) {
             this.state.playerPos = Math.max(0, this.state.playerPos - this.config.moveSpeed);
+            if (!this.state.isJumping && Math.random() > 0.7) {
+                this.createDustEffect(this.state.playerPos + 40, this.config.groundLevel + 10);
+            }
         }
         if (this.state.keys.d) {
             this.state.playerPos = Math.min(this.config.stageWidth - 80, this.state.playerPos + this.config.moveSpeed);
+            if (!this.state.isJumping && Math.random() > 0.7) {
+                this.createDustEffect(this.state.playerPos + 40, this.config.groundLevel + 10);
+            }
         }
 
         // Pulo
@@ -174,24 +180,12 @@ class StreetFighterGame {
         if (this.state.isJumping) return;
         
         this.state.isJumping = true;
-        let velocity = this.config.jumpForce;
-        let position = 0;
-
-        const jumpInterval = setInterval(() => {
-            position += velocity;
-            velocity += this.config.gravity;
-            
-            // Garante que não passe do chão
-            const newPosition = Math.min(0, position);
-            this.dom.player.style.bottom = `${this.config.groundLevel + newPosition}px`;
-
-            // Verifica se voltou ao chão
-            if (newPosition >= 0) {
-                this.dom.player.style.bottom = `${this.config.groundLevel}px`;
-                clearInterval(jumpInterval);
-                this.state.isJumping = false;
-            }
-        }, 16);
+        this.dom.player.classList.add('jumping');
+        
+        setTimeout(() => {
+            this.dom.player.classList.remove('jumping');
+            this.state.isJumping = false;
+        }, 800);
     }
 
     attack(type) {
@@ -202,14 +196,16 @@ class StreetFighterGame {
         this.state.playerStamina -= staminaCost;
 
         // Animação de ataque
-        this.dom.player.classList.add('attacking', type);
-        this.dom.player.style.transform = type === 'punch' 
-            ? 'scale(1.05)' 
-            : 'scale(1.08)';
+        if (type === 'punch') {
+            this.dom.player.querySelector('.arm.right').classList.add('attacking');
+        } else {
+            this.dom.player.querySelector('.leg.right').classList.add('attacking');
+        }
 
         setTimeout(() => {
-            this.dom.player.classList.remove('attacking', type);
-            this.dom.player.style.transform = 'scale(1)';
+            // Remove classes de ataque
+            this.dom.player.querySelector('.arm.right').classList.remove('attacking');
+            this.dom.player.querySelector('.leg.right').classList.remove('attacking');
             this.state.isAttacking = false;
         }, this.config.attackCooldown);
 
@@ -318,9 +314,17 @@ class StreetFighterGame {
         const damage = attackType === 'punch' ? 10 : 15;
         this.state.enemyStamina -= attackType === 'punch' ? 10 : 15;
 
-        this.dom.enemy.classList.add('attacking');
+        // Animação de ataque
+        if (attackType === 'punch') {
+            this.dom.enemy.querySelector('.arm.left').classList.add('attacking');
+        } else {
+            this.dom.enemy.querySelector('.leg.left').classList.add('attacking');
+        }
+
         setTimeout(() => {
-            this.dom.enemy.classList.remove('attacking');
+            // Remove classes de ataque
+            this.dom.enemy.querySelector('.arm.left').classList.remove('attacking');
+            this.dom.enemy.querySelector('.leg.left').classList.remove('attacking');
             this.state.enemyIsAttacking = false;
         }, this.config.attackCooldown / 2);
 
@@ -343,11 +347,20 @@ class StreetFighterGame {
 
     createHitEffect(x, y) {
         const effect = document.createElement('div');
-        effect.className = 'effect hit-effect';
-        effect.style.left = `${x - 30}px`;
-        effect.style.top = `${y - 30}px`;
+        effect.className = 'effect hit-spark';
+        effect.style.left = `${x - 15}px`;
+        effect.style.top = `${y - 15}px`;
         this.dom.effects.appendChild(effect);
         setTimeout(() => effect.remove(), 300);
+    }
+
+    createDustEffect(x, y) {
+        const dust = document.createElement('div');
+        dust.className = 'effect dust-effect';
+        dust.style.left = `${x - 10}px`;
+        dust.style.top = `${y}px`;
+        this.dom.effects.appendChild(dust);
+        setTimeout(() => dust.remove(), 500);
     }
 
     updatePositions() {
@@ -408,11 +421,18 @@ class StreetFighterGame {
         this.state.isAttacking = false;
         this.state.enemyIsAttacking = false;
 
-        this.dom.player.classList.remove('defending', 'attacking', 'punch', 'kick', 'hit');
-        this.dom.enemy.classList.remove('attacking', 'hit');
+        // Reseta todas as animações
+        this.dom.player.classList.remove('defending', 'attacking', 'punch', 'kick', 'hit', 'jumping');
+        this.dom.enemy.classList.remove('attacking', 'hit', 'jumping');
         this.dom.player.style.opacity = '1';
         this.dom.player.style.transform = 'scale(1)';
         this.dom.player.style.bottom = `${this.config.groundLevel}px`;
+        
+        // Reseta membros
+        this.dom.player.querySelector('.arm.right').classList.remove('attacking');
+        this.dom.player.querySelector('.leg.right').classList.remove('attacking');
+        this.dom.enemy.querySelector('.arm.left').classList.remove('attacking');
+        this.dom.enemy.querySelector('.leg.left').classList.remove('attacking');
     }
 
     showResult() {
