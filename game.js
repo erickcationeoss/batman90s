@@ -9,6 +9,7 @@ class StreetFighterGame {
             moveSpeed: 5,
             attackCooldown: 300,
             specialCooldown: 3000,
+            superCooldown: 5000,
             roundTime: 99,
             groundLevel: 100
         };
@@ -31,7 +32,9 @@ class StreetFighterGame {
             playerWins: 0,
             enemyWins: 0,
             gameActive: false,
-            keys: {}
+            keys: {},
+            lastSpecial: 0,
+            lastSuper: 0
         };
 
         // Elementos DOM
@@ -62,6 +65,8 @@ class StreetFighterGame {
         // Event listeners
         document.getElementById('hero').addEventListener('click', () => this.selectCharacter('hero'));
         document.getElementById('villain').addEventListener('click', () => this.selectCharacter('villain'));
+        document.getElementById('ninja').addEventListener('click', () => this.selectCharacter('ninja'));
+        document.getElementById('shadow').addEventListener('click', () => this.selectCharacter('shadow'));
         this.dom.rematchBtn.addEventListener('click', () => this.resetGame());
 
         window.addEventListener('keydown', (e) => this.handleKeyDown(e));
@@ -77,18 +82,17 @@ class StreetFighterGame {
         this.dom.characterSelect.classList.add('hidden');
         this.dom.gameScreen.classList.remove('hidden');
         
-        // Troca cores quando seleciona vilão
-        if (character === 'villain') {
-            this.dom.player.classList.add('villain');
-            this.dom.player.classList.remove('hero');
-            this.dom.enemy.classList.add('hero');
-            this.dom.enemy.classList.remove('villain');
-        } else {
-            this.dom.player.classList.add('hero');
-            this.dom.player.classList.remove('villain');
-            this.dom.enemy.classList.add('villain');
-            this.dom.enemy.classList.remove('hero');
-        }
+        // Remove todas as classes de personagem
+        this.dom.player.classList.remove('hero', 'villain', 'ninja', 'shadow');
+        this.dom.enemy.classList.remove('hero', 'villain', 'ninja', 'shadow');
+        
+        // Adiciona classes baseadas na seleção
+        this.dom.player.classList.add(character);
+        
+        // Define o inimigo como um personagem aleatório diferente
+        const characters = ['hero', 'villain', 'ninja', 'shadow'].filter(c => c !== character);
+        const enemyCharacter = characters[Math.floor(Math.random() * characters.length)];
+        this.dom.enemy.classList.add(enemyCharacter);
         
         this.startGame();
     }
@@ -171,8 +175,16 @@ class StreetFighterGame {
         }
 
         // Ataque especial
-        if (this.state.keys.q && !this.state.isAttacking && this.state.playerStamina >= 30) {
+        const now = Date.now();
+        if (this.state.keys.q && !this.state.isAttacking && this.state.playerStamina >= 30 && now - this.state.lastSpecial > this.config.specialCooldown) {
             this.specialAttack();
+            this.state.lastSpecial = now;
+        }
+
+        // Ataque super
+        if (this.state.keys.t && !this.state.isAttacking && this.state.playerStamina >= 50 && now - this.state.lastSuper > this.config.superCooldown) {
+            this.superAttack();
+            this.state.lastSuper = now;
         }
     }
 
@@ -229,44 +241,200 @@ class StreetFighterGame {
         this.state.isAttacking = true;
         this.state.playerStamina -= 30;
 
-        if (this.state.playerCharacter === 'hero') {
-            // Hadouken
-            const hadouken = document.createElement('div');
-            hadouken.className = 'effect hadouken';
-            hadouken.style.left = `${this.state.playerPos + 80}px`;
-            hadouken.style.bottom = '150px';
-            this.dom.effects.appendChild(hadouken);
-            
-            setTimeout(() => {
-                hadouken.remove();
-                if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
-                    this.state.enemyHP -= 25;
-                    this.createHitEffect(this.state.enemyPos + 40, 150);
-                    if (this.state.enemyHP <= 0) {
-                        this.state.enemyHP = 0;
-                        this.endRound('player');
+        switch(this.state.playerCharacter) {
+            case 'hero':
+                // Hadouken
+                const hadouken = document.createElement('div');
+                hadouken.className = 'effect hadouken';
+                hadouken.style.left = `${this.state.playerPos + 80}px`;
+                hadouken.style.bottom = '150px';
+                this.dom.effects.appendChild(hadouken);
+                
+                setTimeout(() => {
+                    hadouken.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
+                        this.state.enemyHP -= 25;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
                     }
-                }
-            }, 1000);
-        } else {
-            // Shoryuken
-            const shoryuken = document.createElement('div');
-            shoryuken.className = 'effect shoryuken';
-            shoryuken.style.left = `${this.state.playerPos + 40}px`;
-            shoryuken.style.bottom = '100px';
-            this.dom.effects.appendChild(shoryuken);
-            
-            setTimeout(() => {
-                shoryuken.remove();
-                if (Math.abs(this.state.playerPos - this.state.enemyPos) < 150) {
-                    this.state.enemyHP -= 30;
-                    this.createHitEffect(this.state.enemyPos + 40, 150);
-                    if (this.state.enemyHP <= 0) {
-                        this.state.enemyHP = 0;
-                        this.endRound('player');
+                }, 1000);
+                break;
+                
+            case 'villain':
+                // Shoryuken
+                const shoryuken = document.createElement('div');
+                shoryuken.className = 'effect shoryuken';
+                shoryuken.style.left = `${this.state.playerPos + 40}px`;
+                shoryuken.style.bottom = '100px';
+                this.dom.effects.appendChild(shoryuken);
+                
+                setTimeout(() => {
+                    shoryuken.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 150) {
+                        this.state.enemyHP -= 30;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
                     }
+                }, 800);
+                break;
+                
+            case 'ninja':
+                // Shuriken
+                const shuriken = document.createElement('div');
+                shuriken.className = 'effect shuriken';
+                shuriken.style.left = `${this.state.playerPos + 80}px`;
+                shuriken.style.bottom = '160px';
+                this.dom.effects.appendChild(shuriken);
+                
+                setTimeout(() => {
+                    shuriken.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
+                        this.state.enemyHP -= 20;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
+                    }
+                }, 1500);
+                break;
+                
+            case 'shadow':
+                // Dark Blast
+                const darkBlast = document.createElement('div');
+                darkBlast.className = 'effect dark-blast';
+                darkBlast.style.left = `${this.state.playerPos + 80}px`;
+                darkBlast.style.bottom = '150px';
+                this.dom.effects.appendChild(darkBlast);
+                
+                setTimeout(() => {
+                    darkBlast.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
+                        this.state.enemyHP -= 25;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
+                    }
+                }, 1000);
+                break;
+        }
+
+        setTimeout(() => {
+            this.state.isAttacking = false;
+        }, this.config.attackCooldown);
+    }
+
+    superAttack() {
+        this.state.isAttacking = true;
+        this.state.playerStamina -= 50;
+
+        switch(this.state.playerCharacter) {
+            case 'hero':
+                // Kamehameha
+                const kamehameha = document.createElement('div');
+                kamehameha.className = 'effect kamehameha';
+                kamehameha.style.left = `${this.state.playerPos + 80}px`;
+                kamehameha.style.bottom = '150px';
+                this.dom.effects.appendChild(kamehameha);
+                
+                setTimeout(() => {
+                    kamehameha.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 400) {
+                        this.state.enemyHP -= 40;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
+                    }
+                }, 800);
+                break;
+                
+            case 'villain':
+                // Megaton Punch
+                const megatonPunch = document.createElement('div');
+                megatonPunch.className = 'effect megaton-punch';
+                megatonPunch.style.left = `${this.state.enemyPos + 20}px`;
+                megatonPunch.style.bottom = '150px';
+                this.dom.effects.appendChild(megatonPunch);
+                
+                setTimeout(() => {
+                    megatonPunch.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 200) {
+                        this.state.enemyHP -= 50;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
+                    }
+                }, 500);
+                break;
+                
+            case 'ninja':
+                // Tornado Kick
+                const tornadoKick = document.createElement('div');
+                tornadoKick.className = 'effect tornado-kick';
+                tornadoKick.style.left = `${this.state.enemyPos}px`;
+                tornadoKick.style.bottom = '100px';
+                this.dom.effects.appendChild(tornadoKick);
+                
+                setTimeout(() => {
+                    tornadoKick.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 150) {
+                        this.state.enemyHP -= 45;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
+                    }
+                }, 1000);
+                break;
+                
+            case 'shadow':
+                // Shadow Clone
+                const shadowClone = document.createElement('div');
+                shadowClone.className = 'effect shadow-clone';
+                shadowClone.style.left = `${this.state.enemyPos}px`;
+                shadowClone.style.bottom = '100px';
+                this.dom.effects.appendChild(shadowClone);
+                
+                // Cria 3 clones adicionais
+                for (let i = 0; i < 3; i++) {
+                    setTimeout(() => {
+                        const clone = document.createElement('div');
+                        clone.className = 'effect shadow-clone';
+                        clone.style.left = `${this.state.enemyPos + (i * 20)}px`;
+                        clone.style.bottom = '100px';
+                        this.dom.effects.appendChild(clone);
+                        
+                        setTimeout(() => {
+                            clone.remove();
+                        }, 1000);
+                    }, i * 200);
                 }
-            }, 800);
+                
+                setTimeout(() => {
+                    shadowClone.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 200) {
+                        this.state.enemyHP -= 35;
+                        this.createHitEffect(this.state.enemyPos + 40, 150);
+                        if (this.state.enemyHP <= 0) {
+                            this.state.enemyHP = 0;
+                            this.endRound('player');
+                        }
+                    }
+                }, 1000);
+                break;
         }
 
         setTimeout(() => {
@@ -306,6 +474,11 @@ class StreetFighterGame {
         if (distance < 200 && Math.random() < 0.01 && this.state.enemyStamina >= 10) {
             this.enemyAttack();
         }
+        
+        // Ataque especial aleatório
+        if (distance < 250 && Math.random() < 0.005 && this.state.enemyStamina >= 30) {
+            this.enemySpecialAttack();
+        }
     }
 
     enemyAttack() {
@@ -337,6 +510,105 @@ class StreetFighterGame {
                 this.endRound('enemy');
             }
         }
+    }
+
+    enemySpecialAttack() {
+        this.state.enemyIsAttacking = true;
+        this.state.enemyStamina -= 30;
+        
+        const enemyCharacter = this.dom.enemy.classList.contains('hero') ? 'hero' :
+                              this.dom.enemy.classList.contains('villain') ? 'villain' :
+                              this.dom.enemy.classList.contains('ninja') ? 'ninja' : 'shadow';
+
+        switch(enemyCharacter) {
+            case 'hero':
+                // Hadouken
+                const hadouken = document.createElement('div');
+                hadouken.className = 'effect hadouken';
+                hadouken.style.left = `${this.state.enemyPos - 40}px`;
+                hadouken.style.bottom = '150px';
+                this.dom.effects.appendChild(hadouken);
+                
+                setTimeout(() => {
+                    hadouken.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
+                        this.state.playerHP -= 25;
+                        this.createHitEffect(this.state.playerPos + 40, 150);
+                        if (this.state.playerHP <= 0) {
+                            this.state.playerHP = 0;
+                            this.endRound('enemy');
+                        }
+                    }
+                }, 1000);
+                break;
+                
+            case 'villain':
+                // Shoryuken
+                const shoryuken = document.createElement('div');
+                shoryuken.className = 'effect shoryuken';
+                shoryuken.style.left = `${this.state.enemyPos - 20}px`;
+                shoryuken.style.bottom = '100px';
+                this.dom.effects.appendChild(shoryuken);
+                
+                setTimeout(() => {
+                    shoryuken.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 150) {
+                        this.state.playerHP -= 30;
+                        this.createHitEffect(this.state.playerPos + 40, 150);
+                        if (this.state.playerHP <= 0) {
+                            this.state.playerHP = 0;
+                            this.endRound('enemy');
+                        }
+                    }
+                }, 800);
+                break;
+                
+            case 'ninja':
+                // Shuriken
+                const shuriken = document.createElement('div');
+                shuriken.className = 'effect shuriken';
+                shuriken.style.left = `${this.state.enemyPos - 30}px`;
+                shuriken.style.bottom = '160px';
+                this.dom.effects.appendChild(shuriken);
+                
+                setTimeout(() => {
+                    shuriken.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
+                        this.state.playerHP -= 20;
+                        this.createHitEffect(this.state.playerPos + 40, 150);
+                        if (this.state.playerHP <= 0) {
+                            this.state.playerHP = 0;
+                            this.endRound('enemy');
+                        }
+                    }
+                }, 1500);
+                break;
+                
+            case 'shadow':
+                // Dark Blast
+                const darkBlast = document.createElement('div');
+                darkBlast.className = 'effect dark-blast';
+                darkBlast.style.left = `${this.state.enemyPos - 30}px`;
+                darkBlast.style.bottom = '150px';
+                this.dom.effects.appendChild(darkBlast);
+                
+                setTimeout(() => {
+                    darkBlast.remove();
+                    if (Math.abs(this.state.playerPos - this.state.enemyPos) < 300) {
+                        this.state.playerHP -= 25;
+                        this.createHitEffect(this.state.playerPos + 40, 150);
+                        if (this.state.playerHP <= 0) {
+                            this.state.playerHP = 0;
+                            this.endRound('enemy');
+                        }
+                    }
+                }, 1000);
+                break;
+        }
+
+        setTimeout(() => {
+            this.state.enemyIsAttacking = false;
+        }, this.config.attackCooldown);
     }
 
     checkHit(isEnemyAttacking = false) {
@@ -420,6 +692,8 @@ class StreetFighterGame {
         this.state.isDefending = false;
         this.state.isAttacking = false;
         this.state.enemyIsAttacking = false;
+        this.state.lastSpecial = 0;
+        this.state.lastSuper = 0;
 
         // Reseta todas as animações
         this.dom.player.classList.remove('defending', 'attacking', 'punch', 'kick', 'hit', 'jumping');
@@ -433,6 +707,9 @@ class StreetFighterGame {
         this.dom.player.querySelector('.leg.right').classList.remove('attacking');
         this.dom.enemy.querySelector('.arm.left').classList.remove('attacking');
         this.dom.enemy.querySelector('.leg.left').classList.remove('attacking');
+        
+        // Limpa efeitos
+        this.dom.effects.innerHTML = '';
     }
 
     showResult() {

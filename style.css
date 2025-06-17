@@ -4,6 +4,10 @@
     --dark-blue: #3a5a9a;
     --red: #c74e4e;
     --dark-red: #9a3a3a;
+    --green: #4ec74e;
+    --dark-green: #3a9a3a;
+    --black: #333333;
+    --dark-black: #1a1a1a;
     --skin: #f5d7b3;
     --dark-skin: #d4a574;
     --bg-dark: #16213e;
@@ -70,8 +74,10 @@ body {
 
 .characters {
     display: flex;
-    gap: 4rem;
+    flex-wrap: wrap;
+    gap: 2rem;
     margin-bottom: 2rem;
+    justify-content: center;
 }
 
 .character-card {
@@ -80,7 +86,7 @@ body {
     padding: 1.5rem;
     cursor: pointer;
     transition: all 0.3s ease;
-    width: 300px;
+    width: 220px;
     text-align: center;
     border: 3px solid transparent;
 }
@@ -92,18 +98,19 @@ body {
 }
 
 .character-card h2 {
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     margin: 1rem 0 0.5rem;
 }
 
 .character-card p {
     color: #a5b1c2;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
+    margin: 0.3rem 0;
 }
 
 .character-preview {
-    width: 150px;
-    height: 200px;
+    width: 120px;
+    height: 160px;
     margin: 0 auto;
     position: relative;
     background: rgba(0, 0, 0, 0.3);
@@ -118,6 +125,14 @@ body {
     background: var(--red);
 }
 
+#ninja .character-preview {
+    background: var(--green);
+}
+
+#shadow .character-preview {
+    background: var(--black);
+}
+
 .controls {
     margin-top: 2rem;
     font-size: 0.9rem;
@@ -128,6 +143,7 @@ body {
 /* TELA DO JOGO */
 #game-screen {
     background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+    overflow: hidden;
 }
 
 .ui-container {
@@ -212,6 +228,55 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+}
+
+.sun {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background: radial-gradient(circle, #ffde59, #ff914d);
+    border-radius: 50%;
+    top: 50px;
+    right: 100px;
+    z-index: 0;
+    box-shadow: 0 0 50px #ff914d;
+}
+
+.building {
+    position: absolute;
+    bottom: var(--ground-level);
+    width: 200px;
+    height: 300px;
+    background: linear-gradient(to bottom, #333, #222);
+    z-index: 1;
+}
+
+.building.left {
+    left: 0;
+    height: 250px;
+    border-right: 5px solid #444;
+}
+
+.building.right {
+    right: 0;
+    height: 280px;
+    border-left: 5px solid #444;
+}
+
+.building::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: 
+        linear-gradient(to right, transparent 90%, rgba(255,255,255,0.1) 90%),
+        repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent 30px,
+            rgba(255,255,255,0.1) 30px,
+            rgba(255,255,255,0.1) 35px
+        );
 }
 
 .floor {
@@ -316,6 +381,52 @@ body {
     z-index: 11;
 }
 
+/* Estilos específicos para cada personagem */
+.player.hero .head, .enemy.hero .head {
+    background: var(--blue);
+    border-color: var(--dark-blue);
+}
+
+.player.villain .head, .enemy.villain .head {
+    background: var(--red);
+    border-color: var(--dark-red);
+}
+
+.player.ninja .head, .enemy.ninja .head {
+    background: var(--green);
+    border-color: var(--dark-green);
+}
+
+.player.shadow .head, .enemy.shadow .head {
+    background: var(--black);
+    border-color: var(--dark-black);
+}
+
+/* Máscara para o ninja */
+.player.ninja .head::after, .enemy.ninja .head::after {
+    content: '';
+    position: absolute;
+    width: 30px;
+    height: 20px;
+    background: var(--dark-green);
+    top: 25px;
+    left: 5px;
+    border-radius: 10px;
+}
+
+/* Olhos para o shadow */
+.player.shadow .head::before, .enemy.shadow .head::before {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    top: 15px;
+    left: 10px;
+    box-shadow: 15px 0 #fff;
+}
+
 .body {
     position: absolute;
     width: 30px;
@@ -335,6 +446,16 @@ body {
     border: 2px solid var(--dark-red);
 }
 
+.player.ninja .body, .enemy.ninja .body {
+    background: var(--green);
+    border: 2px solid var(--dark-green);
+}
+
+.player.shadow .body, .enemy.shadow .body {
+    background: var(--black);
+    border: 2px solid var(--dark-black);
+}
+
 .arm {
     position: absolute;
     width: 12px;
@@ -352,6 +473,16 @@ body {
 .player.villain .arm, .enemy.villain .arm {
     background: var(--red);
     border: 2px solid var(--dark-red);
+}
+
+.player.ninja .arm, .enemy.ninja .arm {
+    background: var(--green);
+    border: 2px solid var(--dark-green);
+}
+
+.player.shadow .arm, .enemy.shadow .arm {
+    background: var(--black);
+    border: 2px solid var(--dark-black);
 }
 
 .arm.left {
@@ -383,12 +514,34 @@ body {
     border: 2px solid var(--dark-red);
 }
 
+.player.ninja .leg, .enemy.ninja .leg {
+    background: var(--dark-green);
+    border: 2px solid var(--dark-green);
+}
+
+.player.shadow .leg, .enemy.shadow .leg {
+    background: var(--dark-black);
+    border: 2px solid var(--dark-black);
+}
+
 .leg.left {
     left: 25px;
 }
 
 .leg.right {
     left: 45px;
+}
+
+/* Faixa para o ninja */
+.player.ninja .body::before, .enemy.ninja .body::before {
+    content: '';
+    position: absolute;
+    width: 40px;
+    height: 10px;
+    background: var(--dark-green);
+    top: 20px;
+    left: -5px;
+    z-index: 11;
 }
 
 /* ANIMAÇÕES */
@@ -495,6 +648,87 @@ body {
     100% { transform: translateY(-400px) scaleY(0); opacity: 0; }
 }
 
+.shuriken {
+    width: 30px;
+    height: 30px;
+    background: conic-gradient(var(--green) 0% 25%, transparent 25% 50%, var(--green) 50% 75%, transparent 75% 100%);
+    animation: shuriken 1.5s linear forwards;
+    transform: rotate(0deg);
+}
+
+@keyframes shuriken {
+    0% { transform: translateX(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateX(500px) rotate(720deg); opacity: 0; }
+}
+
+.dark-blast {
+    width: 30px;
+    height: 30px;
+    background: radial-gradient(circle, #666, var(--black));
+    border-radius: 50%;
+    animation: darkBlast 1s linear forwards;
+}
+
+@keyframes darkBlast {
+    0% { transform: translateX(0) scale(0.5); opacity: 1; }
+    100% { transform: translateX(500px) scale(1.5); opacity: 0; }
+}
+
+.kamehameha {
+    width: 60px;
+    height: 30px;
+    background: linear-gradient(to right, #4e7ac7, #00ffff, #ffffff);
+    border-radius: 15px;
+    animation: kamehameha 0.8s linear forwards;
+}
+
+@keyframes kamehameha {
+    0% { transform: translateX(0) scaleX(0.5); opacity: 1; }
+    100% { transform: translateX(500px) scaleX(1.5); opacity: 0; }
+}
+
+.megaton-punch {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    background: radial-gradient(circle, #ff0000, #c74e4e);
+    border-radius: 50%;
+    animation: megatonPunch 0.5s ease-out forwards;
+}
+
+@keyframes megatonPunch {
+    0% { transform: scale(0); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.tornado-kick {
+    position: absolute;
+    width: 80px;
+    height: 120px;
+    background: linear-gradient(to bottom, var(--green), transparent);
+    animation: tornadoKick 1s ease-out forwards;
+    border-radius: 50%;
+}
+
+@keyframes tornadoKick {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-300px) rotate(360deg); opacity: 0; }
+}
+
+.shadow-clone {
+    position: absolute;
+    width: 80px;
+    height: 180px;
+    background: rgba(0, 0, 0, 0.3);
+    animation: shadowClone 1s ease-out forwards;
+}
+
+@keyframes shadowClone {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
 /* TELA DE RESULTADO */
 #result-screen {
     background: rgba(0, 0, 0, 0.8);
@@ -535,11 +769,11 @@ body {
 @media (max-width: 768px) {
     .characters {
         flex-direction: column;
-        gap: 2rem;
+        gap: 1.5rem;
     }
     
     .character-card {
-        width: 250px;
+        width: 200px;
     }
     
     .health-container {
@@ -587,5 +821,23 @@ body {
         width: 10px;
         height: 30px;
         top: 70px;
+    }
+    
+    .sun {
+        width: 100px;
+        height: 100px;
+        right: 30px;
+    }
+    
+    .building {
+        width: 120px;
+    }
+    
+    .building.left {
+        height: 180px;
+    }
+    
+    .building.right {
+        height: 200px;
     }
 }
